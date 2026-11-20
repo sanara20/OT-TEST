@@ -1,0 +1,18 @@
+{
+  "id": "./index.html",
+  "name": "OT TEST (English)",
+  "short_name": "OT TEST",
+  "description": "අතිකාල සහ දෛනික දීමනා ගණනය",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f3d3e",
+  "theme_color": "#0f3d3e",
+  "lang": "si",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
