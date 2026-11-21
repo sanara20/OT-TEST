@@ -1,13 +1,13 @@
 {
   "id": "./index.html",
-  "name": "OT TEST (English)",
-  "short_name": "OT TEST",
+  "name": "OT ගණකය",
+  "short_name": "OT ගණකය",
   "description": "අතිකාල සහ දෛනික දීමනා ගණනය",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f3d3e",
+  "background_color": "#0A1931",
   "theme_color": "#0f3d3e",
   "lang": "si",
   "icons": [
