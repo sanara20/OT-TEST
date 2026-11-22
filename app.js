@@ -18,12 +18,13 @@
   const pad = OT.pad;
 
   /* ---------- storage ---------- */
+  const STATION = 'ශික්‍ෂණ රෝහල, පේරාදෙණිය';
   let DB = load();
   function load() {
     try {
       const j = JSON.parse(localStorage.getItem(KEY));
       if (j) return { settings: fixStation(OT.mergeSettings(j.settings)), entries: j.entries || {}, claims: j.claims || {}, wordsOv: j.wordsOv || {} };
-    } catch (e) { /* ignore */ }
+    } catch (e) { try { const raw = localStorage.getItem(KEY); if (raw && !localStorage.getItem(KEY + '.bad')) localStorage.setItem(KEY + '.bad', raw); } catch (e2) { /* ignore */ } }
     return { settings: OT.mergeSettings(null), entries: {}, claims: {} };
   }
   function fixStation(s) { s.station = STATION; return s; }
@@ -34,9 +35,8 @@
   /* ---------- helpers ---------- */
   const $ = (s, r) => (r || document).querySelector(s);
   const APP_VER = 'v23';
-  const STATION = 'ශික්‍ෂණ රෝහල, පේරාදෙණිය';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
-  const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් කාර්යාල නිලධාරියකුට භාවිතා කිරීමට පහසු වන අයුරින් සකස් කර ඇත. කැමති ඕනෑම කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
+  const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින්, දැනට කාර්යාල නිලධාරීන්ගේ රාජකාරි වේලාවන් පදනම් කරගෙන සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
   let logoN = 0;
   function nrLogo(w) { const u = 'l' + (logoN++); return '<svg width="'+w+'" height="'+w+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="gd'+u+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C453"/><stop offset="1" stop-color="#D97706"/></linearGradient><mask id="m'+u+'"><rect width="120" height="120" fill="#fff"/><g transform="translate(60,60) scale(.66) translate(-57,-60)" stroke="#000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M34 82V38L56 82V38"/><path d="M56 38H68a11 11 0 0 1 0 22H56M66 60L80 82"/></g></mask></defs><rect x="4" y="4" width="112" height="112" rx="28" fill="#0A1931"/><path d="M27.1 41A38 38 0 0 1 89.1 35.6" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><path d="M92.9 79A38 38 0 0 1 30.9 84.4" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><circle cx="95.2" cy="45.8" r="4" fill="#1D4ED8"/><circle cx="24.8" cy="74.2" r="4" fill="#1D4ED8"/><circle cx="60" cy="60" r="29" fill="url(#gd'+u+')" mask="url(#m'+u+')"/></svg>'; }
@@ -203,7 +203,7 @@
       (sm.excessDays > 0 ? '<span style="color:var(--bad)">සීමාව ඉක්මවූ දින (නොගෙවේ)</span><b style="color:var(--bad)">' + sm.excessDays + '</b>' : '') +
       '<div class="sep"></div><span><b>TOTAL</b></span><b>' + money(sm.otAmount + sm.allowAmount) + '</b></div>' +
       '<button class="btn alt block" style="margin-top:10px" data-a="viewsum">සාරාංශය බලන්න</button></div>';
-    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>මූලික වැටුප සැකසුම් වල ඇතුළත් කරන්න</span><button class="btn sm" data-a="tab" data-t="settings">සැකසුම්</button></div>';
+    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
     out += installCard();
     { const by = OT.builtinYears(window.LK_HOLIDAYS), now = new Date(), cy = now.getFullYear(), ex = DB.settings.holidayExtra || {};
       const has = (y) => by[y] || Object.keys(ex).some((d) => d.startsWith(y + '-'));
@@ -402,6 +402,19 @@
     o += '<option value="__o"' + (other ? ' selected' : '') + '>' + lg('වෙනත්', 'Other') + '</option></select></label>';
     return o + '<div id="desOther" style="display:' + (other ? 'block' : 'none') + '">' + fld(lg('වෙනත් තනතුර ටයිප් කරන්න', 'Type your designation'), 'designation', 'text') + '</div>';
   }
+  function goProfile(msg) {
+    if (view.tab === 'settings' && guardLeave()) return;
+    closeSheet(); view.tab = 'settings'; view.st = 'me'; render();
+    if (msg) toast(lg('පළමුව මූලික තොරතුරු ඇතුළත් කරන්න', 'Enter the basic details first'), true);
+    const b = document.querySelector('input[data-p=baseSalary]');
+    const t = b ? (b.closest('.card') || b) : null;
+    if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (b) { b.style.outline = '3px solid #dc2626'; setTimeout(() => { b.style.outline = ''; }, 2500); } } else window.scrollTo(0, 0);
+  }
+  function needProfile() {
+    const S = DB.settings;
+    if (Number(S.baseSalary) || S.otRate) return false;
+    goProfile(true); return true;
+  }
   function capGuard() {
     if (!(view.tab === 'settings' && view.capDirty)) return false;
     const b = document.querySelector('[data-a=addcap]');
@@ -467,22 +480,22 @@
     let h = '<div class="row sb" style="margin-bottom:10px"><b>' + lg('භාවිත මාර්ගෝපදේශය', 'User guide') + '</b>' + (EN_ON ? '<div class="seg" style="margin:0;width:170px"><button class="' + (LANG() === 'si' ? 'on' : '') + '" data-a="setlang" data-l="si">සිංහල</button><button class="' + (LANG() === 'en' ? 'on' : '') + '" data-a="setlang" data-l="en">English</button></div>' : '') + '</div>';
     h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([
       lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.'),
-      lg('සැකසුම් → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
-      lg('සැකසුම් → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30/20) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]));
+      lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
+      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]));
     h += sec(lg('2. දිනපතා සටහන් කිරීම', '2. Daily entries'), li([
       lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" ඔබන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
       lg('එක් වේලාවක් පමණක් ඇතුළත් කර SAVE කරන්නත්, අනෙක් වේලාව පසුව ඇතුලත් කරන්නත් පුළුවන් (අසම්පූර්ණ දින ලකුණු වේ).', 'You may save only one time and add the other later (such days are marked incomplete).'),
       lg('පෙර දිනයක් සඳහා "වෙනත් දිනයක් තෝරන්න" හෝ "මාසය" පිටුවෙන් දිනය CLICK කර වේලාවන් ඇතුළත් කරන්න. සේවයට නොපැමිණි දිනයක් නම් "නිවාඩු" හෝ "OFF DAY" ලෙස සලකුණු කරන්න.', 'For an earlier date tap "Pick another date" or open the Month tab and tap the day. Mark leave days as "Leave".'),
       lg('රාත්‍රිය පුරා සේවය නම් "රාත්‍රිය පුරා සේවය" ඔන් කර, පිටවීම ඊළඟ දවසේ වේලාව ඇතුළත් කරන්න.', 'For overnight duty switch on "Overnight duty" and enter the departure time of the next day.')]));
     h += sec(lg('3. ගණනය කරන නීති (සාරාංශය)', '3. Calculation rules (summary)'), li([
-      lg('සතියේ දින රාජකාරිය 08:30–16:15. උදේ OT 07:00 සිට. 15 මිනිත්තු කොටස් වලට පහළට වටයයි.', 'Weekday duty is 08:30–16:15. Morning OT counts from 07:00. Time is rounded down to 15-minute blocks.'),
+      lg('සතියේ දින රාජකාරිය 08:30–16:15. උදේ OT 07:00 සිට. මිනිත්තු 15 කොටස් වලට පහළට වටයයි.', 'Weekday duty is 08:30–16:15. Morning OT counts from 07:00. Time is rounded down to 15-minute blocks.'),
       lg('ප්‍රමාද: විනාඩි 15 ක් දක්වා නම් හවස OT වලින් විනාඩි 15 ක්, විනාඩි 16–30 නම් විනාඩි 30 ක් අඩු වේ. 09:01 න් පසු පැමිණියොත් 18.00 දක්වා සේවය කරන දිනකදී නම් OT නැත. විශේෂ කාල සීමාවකදී නම් ප්‍රමාද වූ කාලය (කෙටි නිවාඩුව හෝ වරුවක නිවාඩුව) OT වලින් අඩු කර ඉතිරි කාලයට ගෙවීම් සැකසේ.', 'Late arrival: up to 15 min deducts 15 min of evening OT, 16–30 min deducts 30 min. Arrival after 09:00 earns no OT.'),
       lg('එක් පැත්තකට අවම විනාඩි 30, දවසට අවම පැය 1.', 'Each side needs at least 30 min and the day at least 1 hour. If one side is 1 hour or more and the other is under 30 min, only the larger side is paid.'),
       lg('සති අන්ත / ර.ප්‍ර. නිවාඩු දිනවල සාමාන්‍ය රාජකාරි වේලාව සඳහා දෛනික දීමනාවක් ලැබේ (වැටුප ÷30 ). ඊට අමතර කාලය OT වේ.', 'Normal hours on weekends and public holidays earn a daily allowance (salary ÷30 or ÷20). Extra hours are OT.'),
-      lg('OT ගෙවන්නේ අවසාන වේලාව (සාමාන්‍යයෙන් 18:00, 2026 නොවැම්බර්–දෙසැම්බර් 22:00) දක්වා පමණි. සැකසුම් → සීමා වලින් වෙනස් කළ හැක.', 'OT is paid only until the cut-off time (default 18:00; 22:00 for Nov–Dec 2026). Change it in Settings → Limits.'),
+      lg('OT ගෙවන්නේ අවසාන වේලාව (සාමාන්‍යයෙන් 18:00, 2026 නොවැම්බර්–දෙසැම්බර් 22:00) දක්වා පමණි. SETTINGS → සීමා වලින් වෙනස් කළ හැක.', 'OT is paid only until the cut-off time (default 18:00; 22:00 for Nov–Dec 2026). Change it in Settings → Limits.'),
       lg('රාත්‍රි සේවය: 16:15 සිට පසුදින 08.30 දක්වා සියල්ල OT. මාසයේ අන්තිම දවසේ නම් රාත්‍රී 12.00 දක්වා ඒ මාසයටත්, 12.00 න් පසු අලුත් මාසයටත් ගණනය වේ.', 'Overnight duty: everything from 16:15 until the next duty start is OT. If it starts on the last day of a month, time until midnight counts to that month and time after midnight counts to the next month.')]));
     h += sec(lg('4. මාසික සීමා', '4. Monthly limits'), li([
-      lg('සැකසුම් → සීමා: මාසය තෝරා අනුමත OT පැය සහ විවේක දින ගණන දාන්න. නව සීමාවක් දාන තෙක් පෙර මාසයේ අගයම යෙදේ.', 'Settings → Limits: choose a month and enter the approved OT hours and rest-day count. The previous month value applies until you enter a new one.'),
+      lg('SETTINGS → සීමා: මාසය තෝරා අනුමත OT පැය සහ විවේක දින ගණන දාන්න. නව සීමාවක් දාන තෙක් පෙර මාසයේ අගයම යෙදේ.', 'Settings → Limits: choose a month and enter the approved OT hours and rest-day count. The previous month value applies until you enter a new one.'),
       lg('සීමාව ඉක්මවූ පැය වවුචරයේ මුළු එකතුවේ පෙන්වයි, ඒත් ගෙවන්නේ අනුමත ප්‍රමාණයට පමණි.', 'Hours above the limit stay in the voucher total but only the approved amount is paid.')]));
     h += sec(lg('5. ඉල්ලීම් සහ වවුචර්', '5. Claims and vouchers'), li([
       lg('මාසය අවසන් වූ විට "මාසය" පිටුවෙන් "වවුචර් සකසන්න" CLICK කරන්න. ඉන්පසු "වවුචර්" පිටුවෙන් වවුචර් විවෘත කරන්න.', 'At month end tap "Save claim" on the Home or Month tab, then open the vouchers from the Claims tab.'),
@@ -492,7 +505,7 @@
     h += sec(lg('6. නිවාඩු දින', '6. Holidays'), li([
       lg('2026 සහ 2027 රජයේ ප්‍රසිද්ධ නිවාඩු දින ඇතුළත්ය. ඉන් පසු වසර වල සිංහල අවුරුදු (අප්‍රේල් 13, 14), මැයි 1, නත්තල, පෙබරවාරි 4 ස්වයංක්‍රීයව ඇතුළත් වේ; පොහොය දින ඇතුළු අනෙක් දින එක් කළ යුතුය. අමතර නිවාඩුවක් ප්‍රකාශයට පත් වුවහොත් සැකසුම් → නිවාඩු වලින් එක් කරන්න, අනවශ්‍ය දිනයක් ඉවත් කරන්න. නැතිනම් ඇප් එකේ අලුත් අනුවාදයක් ලැබෙන තෙක් බලන්න.', 'Public holidays for 2026 and 2027 are built in. After that only fixed-date holidays (Apr 13/14, May 1, Feb 4, Dec 25) are added automatically; add Poya days and others yourself. If the government announces an extra holiday, add it in Settings → Holidays; you can also remove a day.')]));
     h += sec(lg('7. දත්ත ආරක්ෂාව සහ යාවත්කාලීන කිරීම', '7. Data safety and updating'), li([
-      lg('ඔබේ දත්ත ඇත්තේ ෆෝන් එකේ Chrome තුළ පමණි, Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ. සැකසුම් → ඇප් → "BACKUP එකක් ගන්න" මගින් දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.', 'Your data is stored only inside Chrome on this phone. Take a backup regularly from Settings → App → "Download backup file".'),
+      lg('ඔබේ දත්ත ඇත්තේ ෆෝන් එකේ Chrome තුළ පමණි, Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ. SETTINGS → ඇප් → "BACKUP එකක් ගන්න" මගින් දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.', 'Your data is stored only inside Chrome on this phone. Take a backup regularly from Settings → App → "Download backup file".'),
       lg('ඇප් එකේ අලුත් අනුවාදයක් එකතු කලොත් දැනට තිබෙන දත්ත වෙනසක් නොවී පවතී. දත්ත හිස් උනොත් ආසන්නතම BACKUP FILE එකකින් RESTORE කරගන්න.', 'Upload new versions of the app to the same site (the Deploys page on Netlify). A new site shows empty data; if that happens restore your backup file.')]));
     h += sec(lg('8. විශේෂ දින (හිලව් නිවාඩු, OT/දීමනා නොගැනීම)', '8. Special days'), li([
       lg('මාසය අවසානයේ "මාසය" පිටුවෙන් "වවුචර් සකසන්න" ඔබන විට, විශේෂ තීරණයක් ගැනීමට අවශ්‍ය දවසක් (සති අන්ත / නිවාඩු දිනයක වැඩ කිරීම, නිවාඩුවක් සමඟ OT තිබීම, OT 18:00 ට පසුවත් ගන්නා දවසක් වැනි) තිබේ නම් පමණක් "විශේෂ දින" කවුළුවක් එයි. නැතිනම් කෙලින්ම වවුචරයට යයි.', 'A special-days window appears only when needed.'),
@@ -501,14 +514,14 @@
       lg('<b>සම්පූර්ණ පැය ගණනම OT ලෙස</b> – දීමනාවක් වෙනුවට වැඩ කළ සියලු පැය OT ලෙස ගණනය කරයි.', 'Count all hours as OT.'),
       lg('<b>OT උදේ / හවස පමණයි</b> – සතියේ දවසක උදේ OT පමණක් හෝ හවස OT පමණක් ගනී.', 'Morning-only or evening-only OT.'),
       lg('<b>මේ දවසේ OT / දීමනා ගන්නේ නෑ</b> – ඒ දවස ගෙවීමෙන් බැහැර කරයි.', 'Skip the day.'),
-      lg('<b>OT අවසන් වේලාව:</b> OT 22:00 දක්වා අනුමත වී ඇතත්, යම් දවසක 18:30 දක්වා පමණක් OT ගන්නේ නම්, ඒ දවසේ පේළියේ ඇති වේලා තේරීමෙන් එය තෝරන්න. 35 අ වවුචරයේ පෙන්වන්නේ ඔබ තෝරාගත් වේලාවයි.', 'Choose an OT end time per day.'),
-      lg('"CLEAR" ඔබා තෝරා ගැනීම ඉවත් කළ හැක.', 'CLEAR removes the choice.')
+      lg('<b>OT අවසන් වේලාව:</b> OT 22:00 දක්වා අනුමත වී ඇතත්, යම් දවසක ඊට වෙනස් වෙලාවක් (උදා: 18.00) දක්වා පමණක් OT ගන්නේ නම්, ඒ දවසේ පේළියේ ඇති වේලා තේරීමෙන් එය තෝරන්න. 35 අ වවුචරයේ පෙන්වන්නේ ඔබ තෝරාගත් වේලාවයි.', 'Choose an OT end time per day.'),
+      lg('"CLEAR" මඟින් තෝරා ගැනීම ඉවත් කළ හැක.', 'CLEAR removes the choice.')
     ])); 
     h += sec(lg('9. කෙටි නිවාඩු සහ වරුවක නිවාඩු', '9. Short leave and half-day leave'), li([
       lg('සතියේ දවසක ප්‍රමාද වී පැමිණියහොත් හෝ කලින් පිටවුණහොත්, ඒ කාලය නිවාඩුවක් ලෙස සලකා ඒ දවසේ OT වලින් අඩු කරයි. මෙය ප්‍රායෝගිකව බලපාන්නේ රාත්‍රි සේවය හෝ 18:00 ට පසුවත් OT ගන්නා විශේෂ කාල සීමා වලදීයි.', 'Late arrival or early departure on weekdays is treated as leave.'),
       lg('<b>කෙටි නිවාඩුව</b> – පැය 1½ ක් අඩු වේ. පැමිණීම 09:01–10:00 අතර, හෝ පිටවීම 14:45–16:14 අතර.', 'Short leave deducts 1½ hours.'),
       lg('<b>වරුවක නිවාඩුව</b> – පැය 3½ ක් අඩු වේ. පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. 12:30 න් පසු පැමිණියහොත් හෝ 12:00 ට පෙර පිටවුණහොත් ඒ දවසේ OT නැත.', 'Half-day leave deducts 3½ hours.'),
-      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ඒවා වරුවක නිවාඩු ලෙස ගණන් වේ. වරුවක නිවාඩු වලට සීමාවක් නැත.', 'Two short leaves per month.'),
+      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ප්‍රමාදවීම් 03ක් එකතු කර වරුවක නිවාඩු ලෙස ගණන් ගැනේ.', 'Two short leaves per month.'),
       lg('"මාසය" පිටුවේ දිනය යටතේ "කෙටි නිවාඩුව" / "වරුවක නිවාඩුව" ලෙස පෙන්වයි. ඒවා වෙනස් කිරීමට විශේෂ දින කවුළුවේ ඒ දවසේ පේළියෙන් තෝරන්න.', 'Shown as chips in the month list.'),
       lg('නිවාඩු ගණනය කරන විට වරු නිවාඩු දෙකක් එක් දිනක් ලෙස සලකයි (උදා: සම්පූර්ණ දින 2 ක් සහ වරු 2 ක් = දින 3 ක්). කෙටි නිවාඩු ඊට ඇතුළත් නොවේ.', 'Two half-days count as one day.')
     ])); 
@@ -522,17 +535,13 @@
       lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා වචන ඔබටම හදා සුරකින්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
     ])); 
     h += sec(lg('12. Google Lens භාවිතය', '12. Using Google Lens'), li([
-      lg('සැකසුම් → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ට, අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක.', 'Paste printed text instead of typing.'),
+      lg('SETTINGS → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ට, අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක.', 'Paste printed text instead of typing.'),
       lg('ෆෝන් එකේ Google Lens (හෝ Google ඇප්) විවෘත කර මුද්‍රිත ලැයිස්තුව දෙසට කැමරාව යොමු කරන්න. "Text" තෝරා, අවශ්‍ය කොටස තෝරා "Copy text" ඔබන්න.', 'Open Google Lens and copy the text.'),
       lg('OT ඇප් එකට ආපසු ගොස් "අතිකාල රාජකාරි විස්තරය" කොටුවේ ඔබාගෙන සිට "Paste" කරන්න. අවශ්‍ය නම් සංස්කරණය කර SAVE කරන්න.', 'Paste into the description box and save.')
     ])); 
     h += sec(lg('SAVE SETTINGS', '13. Saving settings'), li([
-      lg('සැකසුම් පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
-      lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යන්න බැහැ; අනතුරු ඇඟවීමක් එයි. "සැකසුම් → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
-    ])); 
-    h += sec(lg('About App', '14. About the app'), li([
-      lg('සැකසුම් → ඇප් පිටුවේ "About App" සහ "About Developer" බොත්තම් ඇත. ඒවා සැකසුම් ලොක් වී තිබුණත් භාවිත කළ හැක.', 'About App and About Developer are in Settings → App.'),
-      lg('මෙම ඇප් එක රජයේ නිල ඇප් එකක් නොවේ. ගණනය කිරීම් සහ වවුචර් භාවිතයට පෙර ආයතනයේ නීති රීති සමඟ ගැලපෙනවාදැයි ඔබම පරීක්ෂා කර ගන්න.', 'Not an official app.')
+      lg('SETTINGS පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
+      lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යන්න බැහැ; අනතුරු ඇඟවීමක් එයි. "SETTINGS → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
     ])); 
     return h;
   }
@@ -1051,7 +1060,8 @@
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
     prev() { shiftMonth(-1); render(); },
     next() { shiftMonth(1); render(); },
-    edit(el) { openEditor(el.dataset.d); },
+    edit(el) { if (needProfile()) return; openEditor(el.dataset.d); },
+    gotoprofile() { goProfile(false); },
     closeSheet,
     togcal() { view.showCal = !view.showCal; render(); },
     gotoday() { view.month = todayStr().slice(0, 7); render(); },
@@ -1071,6 +1081,7 @@
       view.capDirty = false; save(); render(); toast((el.dataset.t === 'h' ? 'OT පැය' : 'විවේක දින') + ' සීමාව ඉවත් කළා');
     },
     quick(el) {
+      if (needProfile()) return;
       const t = todayStr(), n = new Date(), v = pad(n.getHours()) + ':' + pad(n.getMinutes());
       const e = DB.entries[t] || { status: 'worked', in: '', out: '' };
       e.status = 'worked'; e[el.dataset.f] = v;
@@ -1198,6 +1209,29 @@
     backuplater() { DB.settings.backupSnooze = todayStr(); save(); render(); },
   };
 
+  (function () {
+    let sx = 0, sy = 0, ok = false;
+    const blocked = (t) => {
+      if (document.querySelector('#sheet.on, #welcomeScreen, #splash, .fullscreen, .overlay')) return true;
+      for (let n = t; n && n !== document.body; n = n.parentElement) {
+        if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.isContentEditable) return true;
+        if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true;
+      }
+      return false;
+    };
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) { ok = false; return; }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; ok = !blocked(e.target);
+    }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      if (!ok) return; ok = false;
+      const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 2) return;
+      const tabs = [...document.querySelectorAll('[data-a=tab]')].map((b) => b.dataset.t).filter((x, i, a) => a.indexOf(x) === i);
+      const i = tabs.indexOf(view.tab), j = i + (dx < 0 ? 1 : -1);
+      if (i >= 0 && j >= 0 && j < tabs.length) A.tab({ dataset: { t: tabs[j] } });
+    }, { passive: true });
+  })();
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-a]');
     if (el && A[el.dataset.a]) { e.preventDefault(); A[el.dataset.a](el); }
@@ -1322,7 +1356,7 @@
     const S = DB.settings;
     const ov = fullScreen('welcomeScreen', '<div style="font-size:42px">👋</div>' +
       '<div style="font-size:24px;font-weight:700">' + lg('ආයුබෝවන්!', 'Welcome!') + '</div>' +
-      '<div style="opacity:.9;font-size:16px;max-width:330px;line-height:1.6">' + lg(NOTE_SI + ' දැනට කාර්යාල නිලධාරීන්ගේ රාජකාරි වේලාවන් පදනම් කරගෙන සකසා ඇත.', NOTE_EN + ' It is currently set up around office officers\' duty hours.') + '</div>' +
+      '<div style="opacity:.9;font-size:16px;max-width:330px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div>' +
       '<button id="wNext" style="' + BS + '">' + lg('තේරුම් ගත්තා, ඉදිරියට ➜', 'I understand, continue ➜') + '</button>');
     ov.querySelector('#wNext').onclick = () => { S.welcomeSeen = true; S.noticeSeen = true; save(); ov.remove(); startFlow(); };
   }
