@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  if (window.__BUILD !== '22' || !window.OT || window.OT.BUILD !== '22') { /* mixed cached files: clear caches once and reload */
+  if (window.__BUILD !== '23' || !window.OT || window.OT.BUILD !== '23') { /* mixed cached files: clear caches once and reload */
     try { if (!sessionStorage.getItem('ot.heal')) { sessionStorage.setItem('ot.heal', '1');
       Promise.all([(navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))) : 0), (window.caches ? caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))) : 0)]).then(() => location.reload(), () => location.reload()); return; } } catch (e) {}
     const sp = document.getElementById('splash'); if (sp) sp.remove();
@@ -32,14 +32,14 @@
 
   /* ---------- helpers ---------- */
   const $ = (s, r) => (r || document).querySelector(s);
-  const APP_VER = 'v22';
+  const APP_VER = 'v23';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
-  const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. තවත් කාර්යාල නිලධාරියකුට භාවිතා කිරීමට හැකි වන අයුරින් සකස් කර ඇත. කැමති ඕනෑම කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
+  const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් කාර්යාල නිලධාරියකුට භාවිතා කිරීමට පහසු වන අයුරින් සකස් කර ඇත. කැමති ඕනෑම කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
   let logoN = 0;
   function nrLogo(w) { const u = 'l' + (logoN++); return '<svg width="'+w+'" height="'+w+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="gd'+u+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C453"/><stop offset="1" stop-color="#D97706"/></linearGradient><mask id="m'+u+'"><rect width="120" height="120" fill="#fff"/><g transform="translate(60,60) scale(.66) translate(-57,-60)" stroke="#000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M34 82V38L56 82V38"/><path d="M56 38H68a11 11 0 0 1 0 22H56M66 60L80 82"/></g></mask></defs><rect x="4" y="4" width="112" height="112" rx="28" fill="#0A1931"/><path d="M27.1 41A38 38 0 0 1 89.1 35.6" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><path d="M92.9 79A38 38 0 0 1 30.9 84.4" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><circle cx="95.2" cy="45.8" r="4" fill="#1D4ED8"/><circle cx="24.8" cy="74.2" r="4" fill="#1D4ED8"/><circle cx="60" cy="60" r="29" fill="url(#gd'+u+')" mask="url(#m'+u+')"/></svg>'; }
   const EN_ON = window.OT_DEV === true; /* English UI is still being prepared – only the test build enables it */
-  const HELP_READY = window.OT_DEV === true;
+  const HELP_READY = true;
   const LANG = () => (EN_ON && DB.settings.lang === 'en' ? 'en' : 'si');
   const lg = (si, en) => (LANG() === 'en' ? en : si);
   const tr = (s) => (LANG() === 'en' && window.I18N ? window.I18N.tr(s) : s);
@@ -94,7 +94,7 @@
     document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.t === view.tab));
     const showNav = view.tab === 'home' || view.tab === 'month';
     document.querySelectorAll('header.top .iconbtn,#mname').forEach((e) => { e.style.visibility = showNav ? 'visible' : 'hidden'; });
-    $('#ttl').textContent = { home: 'OT ගණකය', month: 'මාසික සටහන', claims: 'වවුචර්', settings: 'සැකසුම්', help: 'උදවු' }[view.tab];
+    $('#ttl').textContent = { home: 'OT ගණකය', month: 'මාසික සටහන', claims: 'වවුචර්', settings: 'SETTINGS', help: 'උදවු' }[view.tab];
     const app = $('#app');
     if (view.tab === 'home') app.innerHTML = renderHome();
     else if (view.tab === 'month') app.innerHTML = renderMonth();
@@ -234,7 +234,7 @@
         right = (r.ot > 0 ? '<b style="color:var(--ok)">' + dur(r.ot) + '</b>' : '<span class="mute">OT නෑ</span>') + (r.allowance ? '<br><span class="chip ok">දීමනා</span>' : '') + (r.splitNext ? '<br><span class="mute">00:00 න් පසු ' + dur(r.splitNext) + ' → ඊළඟ මාසයට</span>' : '');
       } else if (r.kind === 'worked') { mid = '<span style="color:var(--bad)">වැරදි වේලාවක්</span>'; }
       if (r.kind === 'worked' && r.valid) {
-        if (r.adjFail) mid += '<br><span class="chip bad">ගෙවන්නේ නැත – ආසන්න වැඩ දිනයේ සේවය නැත</span>';
+        if (r.adjFail) mid += '<br><span class="chip bad">ගෙවන්නේ නැත – ආසන්න වැඩකරන දිනයේ සේවය නැත</span>';
         else if (r.adj === 'pending') mid += '<br><span class="chip warn">⚠ ආසන්න වැඩකරන දිනය තහවුරු කර නැත</span>';
         if (r.leave === 'short') mid += '<br><span class="chip mu">කෙටි නිවාඩුව</span>';
         else if (r.leave === 'half') mid += '<br><span class="chip mu">වරුවක නිවාඩුව</span>';
@@ -254,7 +254,7 @@
     let out = '<div class="card" id="mSum"><h2>' + monthLabel(view.month) + ' සාරාංශය</h2><div class="tot">' +
       '<span>සේවය කල දින ගණන</span><b>' + sm.workedDays + '</b>' +
       '<span>ලබා ගත් නිවාඩු / OFF</span><b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + ' / ' + sm.offDays + '</b>' +
-      (sm.shortLeaves || sm.halfDays ? lb('කෙටි නිවාඩු / Half Day', 'කෙටි නිවාඩු මාසයට ' + sm.shortLeaveCap + 'ක් හිමියි') + '<b>' + sm.shortLeaves + ' / ' + sm.halfDays + '</b>' : '') +
+      (sm.shortLeaves || sm.halfDays ? lb('කෙටි නිවාඩු / වරුවක නිවාඩු', 'කෙටි නිවාඩු මාසයට ' + sm.shortLeaveCap + 'ක් හිමියි') + '<b>' + sm.shortLeaves + ' / ' + sm.halfDays + '</b>' : '') +
       '<div class="sep"></div>' + lb('<b>OT + DAYS PAY</b>') + '<b style="font-size:20px">' + money(sm.otAmount + sm.allowAmount) + '</b></div></div>' +
       '<div class="card"><h2>OT</h2><div class="tot">' +
       '<span>අනුමත උපරිම පැය ගණන</span><b>' + (sm.capH != null ? sm.capH + ':00' : 'සීමාවක් නෑ') + '</b>' +
@@ -290,19 +290,19 @@
     let o = '<div style="background:var(--card);color:var(--ink);border-radius:18px;padding:16px;width:100%;max-width:440px;max-height:92vh;overflow:auto"><b style="font-size:18px">' + monthLabel(view.month) + ' – විශේෂ දින තියෙනවද?</b>';
     if (!open) {
       o += '<p class="mute">හිලව් නිවාඩුවක් සඳහා දින ඉතිරි කිරීම, දීමනාවක් වෙනුවට සම්පූර්ණ පැය OT ලෙස ගැනීම, OT උදේ/හවස පමණක් ගැනීම, OT අවසන් වේලාව වෙනස් කිරීම හෝ සමහර දවස් වල OT/දීමනා නොගැනීම මෙතනින් තෝරන්න.</p>' +
-        '<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold" data-a="claimgo">නැහැ, ඉදිරියට</button><button class="btn alt" data-a="spopen">ඔව්, දින තෝරන්න</button><button class="btn alt" data-a="spclose">අවලංගු</button></div></div>';
+        '<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold" data-a="claimgo">නැහැ, ඉදිරියට</button><button class="btn alt" data-a="spopen">ඔව්, දින තෝරන්න</button><button class="btn alt" data-a="spclose">CANCEL</button></div></div>';
     } else {
       o += '<p class="mute" style="margin:6px 0">දවස් ටික් කරලා පහළින් විකල්පයක් තේරුවම ඒ සියල්ලටම යෙදෙනවා</p>';
       days.forEach((r) => {
         const sp = r.entry.special;
         o += '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="spck" value="' + r.date + '" style="width:22px;height:22px">' +
           '<span><b>' + dayNum(r.date) + '</b> ' + DAYS_S[wd(r.date)] + (r.type !== 'weekday' ? ' <span class="chip mu">විවේක</span>' : '') + ' <span class="mute">' + hm(r.entry.in) + '→' + hm(r.entry.out) + '</span>' +
-          (sp ? '<br><span class="chip warn">★ ' + SPN[sp] + '</span>' : '') + (r.res.leave ? '<br><select data-c="splv" data-d="' + r.date + '" style="margin-top:4px"><option value="">' + (r.res.leave === 'short' ? 'Short Leave' : 'Half Day Leave') + ' (ස්වයංක්‍රීය)</option><option value="short"' + (r.entry.lvOverride === 'short' ? ' selected' : '') + '>කෙටි නිවාඩුවක් ලෙස</option><option value="half"' + (r.entry.lvOverride === 'half' ? ' selected' : '') + '>දින භාගයක නිවාඩුවක් ලෙස</option></select>' : '') + (r.type === 'weekday' && !r.entry.overnight && r.res.kind === 'worked' ? '<br><select data-c="spot" data-d="' + r.date + '" style="margin-top:4px">' + otToOpts(r.entry.otTo || '') + '</select>' : '') + (r.res.adjFail ? '<br><span class="chip bad">ආසන්න වැඩ කරන දිනයේ සේවයකර නැත – ගෙවන්නේ නැත</span>' : '') + '</span></label>';
+          (sp ? '<br><span class="chip warn">★ ' + SPN[sp] + '</span>' : '') + (r.res.leave ? '<br><select data-c="splv" data-d="' + r.date + '" style="margin-top:4px"><option value="">' + (r.res.leave === 'short' ? 'කෙටි නිවාඩුව' : 'වරුවක නිවාඩුව') + ' (ස්වයංක්‍රීය)</option><option value="short"' + (r.entry.lvOverride === 'short' ? ' selected' : '') + '>කෙටි නිවාඩුවක් ලෙස</option><option value="half"' + (r.entry.lvOverride === 'half' ? ' selected' : '') + '>වරුවක නිවාඩුවක් ලෙස</option></select>' : '') + (r.type === 'weekday' && !r.entry.overnight && r.res.kind === 'worked' ? '<br><select data-c="spot" data-d="' + r.date + '" style="margin-top:4px">' + otToOpts(r.entry.otTo || '') + '</select>' : '') + (r.res.adjFail ? '<br><span class="chip bad">ආසන්න වැඩ කරන දිනයේ සේවයකර නැත – ගෙවන්නේ නැත</span>' : '') + '</span></label>';
       });
       o += '<div style="display:grid;gap:6px;margin-top:10px">' + ['comp', 'allot', 'am', 'pm', 'skip', 'noot'].map((k) => '<button class="btn alt sm" data-a="spset" data-v="' + k + '">' + SPN[k] + '</button>').join('') +
         '<button class="btn alt sm" data-a="spset" data-v="">CLEAR (තෝරා ගැනීම ඉවත් කරන්න)</button></div>' +
         '<div class="mute" style="margin-top:6px">සටහන: "හිලව් නිවාඩුව" සහ "සම්පූර්ණ පැය OT" වලට අදාල වන්නේ විවේක දින (සෙනසුරාදා/ඉරිදා/PH) පමණි.</div>' +
-        '<div class="row" style="gap:8px;margin-top:12px"><button class="btn gold" data-a="claimgo">ඉදිරියට – වවුචර් සකසන්න</button><button class="btn alt" data-a="spclose">අවලංගු</button></div></div>';
+        '<div class="row" style="gap:8px;margin-top:12px"><button class="btn gold" data-a="claimgo">ඉදිරියට – වවුචර් සකසන්න</button><button class="btn alt" data-a="spclose">CANCEL</button></div></div>';
     }
     p.innerHTML = o; document.body.appendChild(p);
   }
@@ -310,14 +310,14 @@
   function claimStale(k) { const c = DB.claims[k]; return !c || sumKey(c.sum) !== sumKey(OT.summarize(k, DB.entries, DB.settings, H())); }
   function renderClaims() {
     const keys = Object.keys(DB.claims).sort().reverse();
-    if (!keys.length) return '<div class="card mute" data-a="gotoclaim" style="cursor:pointer">තවම SAVE කල වවුචර් නෑ. "මාසය" පිටුවේ "වවුචර් සකසන්න" බොත්තම ඔබන්න. <b style="color:var(--brand2)">(or CLICK HERE ➜)</b></div>';
+    if (!keys.length) return '<div class="card mute"><p style="margin:0 0 10px">තවම SAVE කල වවුචර් නෑ. වවුචරයක් සැකසීමට "මාසය" පිටුවේ "වවුචර් සකසන්න" බොත්තම ඔබන්න.</p><button class="btn gold block" data-a="gotoclaim">මාසය පිටුවට යන්න ➜</button></div>';
     return keys.map((k) => {
       const c = DB.claims[k];
       if (claimStale(k)) {
         return '<div class="card" style="border:2px solid #e8b53a"><div class="row sb"><b>' + monthLabel(k) + '</b><span class="chip warn">මාසයේ දත්ත වෙනස් වී ඇත</span></div>' +
-          '<p class="mute" style="margin:8px 0">SAVE කර ඇති වවුචරයේ මුදල ගෙවිය යුතු මුදලට නොගැළපේ. නැවත සකසන්න.</p>' +
+          '<p class="mute" style="margin:8px 0">SAVE කර ඇති වවුචරයේ මුදල, ගෙවිය යුතු මුදලට නොගැළපේ. නැවත සකසන්න.</p>' +
           '<div class="row" style="flex-wrap:wrap"><button class="btn sm gold" data-a="gotoclaim" data-m="' + k + '">වවුචර් නැවත සකසන්න ➜</button>' +
-          '<button class="btn sm alt" data-a="delclaim" data-m="' + k + '">ඉවත් කරන්න</button></div></div>';
+          '<button class="btn sm alt" data-a="delclaim" data-m="' + k + '">REMOVE</button></div></div>';
       }
       const s = c.sum;
       return '<div class="card"><div class="row sb"><b>' + monthLabel(k) + '</b><span class="mute">' + new Date(c.at).toLocaleDateString() + '</span></div>' +
@@ -325,7 +325,7 @@
         '<span>දෛනික දීමනා (' + (s.allowPay != null ? s.allowPay : s.allowDays) + ')</span><b>' + money(s.allowAmount) + '</b></div>' +
         '<div class="row" style="flex-wrap:wrap"><button class="btn sm" data-a="voucher" data-k="ot" data-m="' + k + '">OT වවුචරය</button>' +
         '<button class="btn sm" data-a="voucher" data-k="al" data-m="' + k + '">දීමනා වවුචරය</button>' +
-        '<button class="btn sm alt" data-a="delclaim" data-m="' + k + '">ඉවත් කරන්න</button></div></div>';
+        '<button class="btn sm alt" data-a="delclaim" data-m="' + k + '">REMOVE</button></div></div>';
     }).join('');
   }
 
@@ -343,11 +343,11 @@
     for (const [d, n] of Object.entries(S.holidayExtra)) if (d.startsWith(yr + '-')) rows.push({ d, n, src: 'x', removed: false });
     rows.sort((a, b) => (a.d < b.d ? -1 : 1));
     const yrs = [new Date().getFullYear(), new Date().getFullYear() + 1, new Date().getFullYear() + 2];
-    let h = '<div class="card"><h2>රජයේ ප්‍රසිද්ධ නිවාඩු දින</h2>' +
-      '<div class="seg">' + yrs.map((y) => '<button class="' + (y === +yr ? 'on' : '') + '" data-a="hy" data-y="' + y + '">' + y + '</button>').join('') + '</div>';
+    let h = '<!--YB--><div class="card" style="padding-bottom:10px"><h2>රජයේ ප්‍රසිද්ධ නිවාඩු දින</h2>' +
+      '<div class="seg" style="margin-bottom:0">' + yrs.map((y) => '<button class="' + (y === +yr ? 'on' : '') + '" data-a="hy" data-y="' + y + '">' + y + '</button>').join('') + '</div></div><!--/YB--><div class="card">';
     if (!rows.length) h += '<p class="mute">මෙම වසර සඳහා ලැයිස්තුවක් ඇතුළත් කර නෑ. අවශ්‍ය දින පහත එක් කරන්න.</p>';
     h += rows.map((r) => '<div class="row sb" style="padding:6px 0;border-bottom:1px solid var(--line);' + (r.removed ? 'opacity:.5;text-decoration:line-through' : '') + '"><div><b>' + r.d.slice(5) + '</b> · ' + DAYS_S[wd(r.d)] + '<br><span class="mute">' + esc(r.n) + (r.src === 'x' ? ' (ඔබ එක් කළ)' : '') + '</span></div>' +
-      '<button class="btn alt sm" data-a="' + (r.src === 'x' ? 'delhol' : r.removed ? 'resthol' : 'remhol') + '" data-d="' + r.d + '">' + (r.removed ? 'නැවත' : 'ඉවත්') + '</button></div>').join('');
+      '<button class="btn alt sm" data-a="' + (r.src === 'x' ? 'delhol' : r.removed ? 'resthol' : 'remhol') + '" data-d="' + r.d + '">' + (r.removed ? 'නැවත' : 'REMOVE') + '</button></div>').join('');
     h += '<div class="grid2" style="margin-top:12px"><label class="f"><span>දිනය</span><input type="date" id="hd"></label><label class="f"><span>නම</span><input type="text" id="hn" placeholder="උදා: විශේෂ නිවාඩුව"></label></div>' +
       '<button class="btn block" data-a="addhol">නිවාඩු දිනයක් එක් කරන්න</button></div>';
     return h;
@@ -384,12 +384,13 @@
     const lk = S.locked === true;
     const i = h0.indexOf('</div>') + 6; /* after the tab strip */
     const strip = h0.slice(0, i), full = h0.slice(i), oi = full.indexOf('<!--OUT-->'), body = oi < 0 ? full : full.slice(0, oi), outside = oi < 0 ? '' : full.slice(oi + 10);
-    const banner = lk ? '<div style="margin-bottom:12px"><button class="btn alt block" data-a="unlock">🔒 ' + lg('සැකසුම් වෙනස් කරන්න', 'Edit settings') + '</button></div>' : '';
+    const ybm = body.match(/<!--YB-->([\s\S]*?)<!--\/YB-->/); const yb = ybm ? ybm[1] : '';
+    const banner = lk ? '<div style="margin-bottom:12px"><button class="btn alt block" data-a="unlock">🔒 ' + lg('CHANGE SETTINGS', 'Edit settings') + '</button></div>' : '';
     const idx = STABS.findIndex((x) => x[0] === st);
     const arrows = '<div class="row" style="gap:10px;margin-top:10px">' + (idx > 0 ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="-1">◀</button>' : '<span style="flex:1"></span>') +
       (idx < STABS.length - 1 ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="1">▶</button>' : '<span style="flex:1"></span>') + '</div>';
     const save = lk ? '' : '<button class="btn gold block" id="saveBtn" data-a="savenext">SAVE</button>';
-    return strip + banner + '<fieldset ' + (lk ? 'disabled' : '') + ' style="border:0;padding:0;margin:0;min-width:0">' + body + '</fieldset>' + outside + save + arrows;
+    return strip + banner + yb + '<fieldset ' + (lk ? 'disabled' : '') + ' style="border:0;padding:0;margin:0;min-width:0">' + body.replace(/<!--YB-->[\s\S]*?<!--\/YB-->/, '') + '</fieldset>' + outside + save + arrows;
   }
   const DESIGS = ['රාජ්‍ය සෞඛ්‍ය කළමනාකරණ සහකාර', 'සංවර්ධන නිලධාරී'];
   function desigField() {
@@ -450,9 +451,10 @@
         '<label class="btn alt sm" style="cursor:pointer">RESTORE FROM BACKUP FILE<input type="file" accept="application/json" id="restore" hidden></label></div>' +
         '<p class="mute" style="margin-bottom:0">Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ, ඒ නිසා දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.</p></div>';
       h += '<!--OUT-->';
-      h += '<div class="card" style="margin-top:12px"><button class="btn block" data-a="aboutapp">About App</button><div id="aboutAppBox" style="display:none;margin-top:10px;text-align:left"><div style="font-weight:700">OT Calculator · v' + APP_VER.replace('v', '') + '</div><div class="mute" style="margin-top:6px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div></div></div>';
-      h += '<button class="btn block" data-a="tab" data-t="help">❓ උදවු / භාවිත මාර්ගෝපදේශය</button>';
-      h += '<div class="card" style="text-align:center;margin-top:12px"><div style="display:flex;justify-content:center">' + nrLogo(72) + '</div><button class="btn block" style="margin-top:10px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
+      h += '<button class="btn block" style="margin-top:12px" data-a="tab" data-t="help">❓ උදවු / භාවිත මාර්ගෝපදේශය</button>';
+      h += '<div class="card" style="text-align:center;margin-top:12px"><div style="display:flex;justify-content:center;margin-bottom:10px">' + nrLogo(72) + '</div>' +
+        '<button class="btn block" data-a="aboutapp">About App</button><div id="aboutAppBox" style="display:none;margin:10px 0;text-align:left"><div style="font-weight:700">OT Calculator · v' + APP_VER.replace('v', '') + '</div><div class="mute" style="margin-top:6px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div></div>' +
+        '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
     }
     return h;
   }
@@ -473,9 +475,9 @@
       lg('රාත්‍රිය පුරා සේවය නම් "රාත්‍රිය පුරා සේවය" ඔන් කර, පිටවීම ඊළඟ දවසේ වේලාව ඇතුළත් කරන්න.', 'For overnight duty switch on "Overnight duty" and enter the departure time of the next day.')]));
     h += sec(lg('3. ගණනය කරන නීති (සාරාංශය)', '3. Calculation rules (summary)'), li([
       lg('සතියේ දින රාජකාරිය 08:30–16:15. උදේ OT 07:00 සිට. 15 මිනිත්තු කොටස් වලට පහළට වටයයි.', 'Weekday duty is 08:30–16:15. Morning OT counts from 07:00. Time is rounded down to 15-minute blocks.'),
-      lg('ප්‍රමාද: විනාඩි 15 ක් දක්වා නම් හවස OT වලින් විනාඩි 15 ක්, විනාඩි 16–30 නම් විනාඩි 30 ක් අඩු වේ. 09:01 න් පසු පැමිණියොත් 18.00 දක්වා සේවය කරන දිනකදී නම් OT නැත. විශේෂ කාල සීමාවකදී නම් ප්‍රමාද වූ කාලය (SHORT LEAVE හෝ HALF DAY) OT වලින් අඩු කර ඉතිරි කාලයට ගෙවීම් සැකසේ.', 'Late arrival: up to 15 min deducts 15 min of evening OT, 16–30 min deducts 30 min. Arrival after 09:00 earns no OT.'),
+      lg('ප්‍රමාද: විනාඩි 15 ක් දක්වා නම් හවස OT වලින් විනාඩි 15 ක්, විනාඩි 16–30 නම් විනාඩි 30 ක් අඩු වේ. 09:01 න් පසු පැමිණියොත් 18.00 දක්වා සේවය කරන දිනකදී නම් OT නැත. විශේෂ කාල සීමාවකදී නම් ප්‍රමාද වූ කාලය (කෙටි නිවාඩුව හෝ වරුවක නිවාඩුව) OT වලින් අඩු කර ඉතිරි කාලයට ගෙවීම් සැකසේ.', 'Late arrival: up to 15 min deducts 15 min of evening OT, 16–30 min deducts 30 min. Arrival after 09:00 earns no OT.'),
       lg('එක් පැත්තකට අවම විනාඩි 30, දවසට අවම පැය 1.', 'Each side needs at least 30 min and the day at least 1 hour. If one side is 1 hour or more and the other is under 30 min, only the larger side is paid.'),
-      lg('සති අන්ත / ර.ප්‍ර. නිවාඩු දිනවල සාමාන්‍ය රාජකාරි වේලාව සඳහා දෛනික දීමනාවක් ලැබේ (වැටුප ÷30 හෝ ÷20). ඊට අමතර කාලය OT වේ.', 'Normal hours on weekends and public holidays earn a daily allowance (salary ÷30 or ÷20). Extra hours are OT.'),
+      lg('සති අන්ත / ර.ප්‍ර. නිවාඩු දිනවල සාමාන්‍ය රාජකාරි වේලාව සඳහා දෛනික දීමනාවක් ලැබේ (වැටුප ÷30 ). ඊට අමතර කාලය OT වේ.', 'Normal hours on weekends and public holidays earn a daily allowance (salary ÷30 or ÷20). Extra hours are OT.'),
       lg('OT ගෙවන්නේ අවසාන වේලාව (සාමාන්‍යයෙන් 18:00, 2026 නොවැම්බර්–දෙසැම්බර් 22:00) දක්වා පමණි. සැකසුම් → සීමා වලින් වෙනස් කළ හැක.', 'OT is paid only until the cut-off time (default 18:00; 22:00 for Nov–Dec 2026). Change it in Settings → Limits.'),
       lg('රාත්‍රි සේවය: 16:15 සිට පසුදින 08.30 දක්වා සියල්ල OT. මාසයේ අන්තිම දවසේ නම් රාත්‍රී 12.00 දක්වා ඒ මාසයටත්, 12.00 න් පසු අලුත් මාසයටත් ගණනය වේ.', 'Overnight duty: everything from 16:15 until the next duty start is OT. If it starts on the last day of a month, time until midnight counts to that month and time after midnight counts to the next month.')]));
     h += sec(lg('4. මාසික සීමා', '4. Monthly limits'), li([
@@ -491,6 +493,46 @@
     h += sec(lg('7. දත්ත ආරක්ෂාව සහ යාවත්කාලීන කිරීම', '7. Data safety and updating'), li([
       lg('ඔබේ දත්ත ඇත්තේ ෆෝන් එකේ Chrome තුළ පමණි, Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ. සැකසුම් → ඇප් → "BACKUP එකක් ගන්න" මගින් දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.', 'Your data is stored only inside Chrome on this phone. Take a backup regularly from Settings → App → "Download backup file".'),
       lg('ඇප් එකේ අලුත් අනුවාදයක් එකතු කලොත් දැනට තිබෙන දත්ත වෙනසක් නොවී පවතී. දත්ත හිස් උනොත් ආසන්නතම BACKUP FILE එකකින් RESTORE කරගන්න.', 'Upload new versions of the app to the same site (the Deploys page on Netlify). A new site shows empty data; if that happens restore your backup file.')]));
+    h += sec(lg('8. විශේෂ දින (හිලව් නිවාඩු, OT/දීමනා නොගැනීම)', '8. Special days'), li([
+      lg('මාසය අවසානයේ "මාසය" පිටුවෙන් "වවුචර් සකසන්න" ඔබන විට, විශේෂ තීරණයක් ගැනීමට අවශ්‍ය දවසක් (සති අන්ත / නිවාඩු දිනයක වැඩ කිරීම, නිවාඩුවක් සමඟ OT තිබීම, OT 18:00 ට පසුවත් ගන්නා දවසක් වැනි) තිබේ නම් පමණක් "විශේෂ දින" කවුළුවක් එයි. නැතිනම් කෙලින්ම වවුචරයට යයි.', 'A special-days window appears only when needed.'),
+      lg('දවස් ටික් කර පහළින් විකල්පයක් තෝරන්න. එය ටික් කළ සියලු දවස් වලට එකවර යෙදේ:', 'Tick days, then choose an option.'),
+      lg('<b>හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා</b> – විවේක දිනයක වැඩ කළ දවස දීමනාවක් වෙනුවට හිලව් නිවාඩුවකට ඉතිරි කරයි (දීමනා/OT ගෙවන්නේ නැත).', 'Save for compensatory leave.'),
+      lg('<b>සම්පූර්ණ පැය ගණනම OT ලෙස</b> – දීමනාවක් වෙනුවට වැඩ කළ සියලු පැය OT ලෙස ගණනය කරයි.', 'Count all hours as OT.'),
+      lg('<b>OT උදේ / හවස පමණයි</b> – සතියේ දවසක උදේ OT පමණක් හෝ හවස OT පමණක් ගනී.', 'Morning-only or evening-only OT.'),
+      lg('<b>මේ දවසේ OT / දීමනා ගන්නේ නෑ</b> – ඒ දවස ගෙවීමෙන් බැහැර කරයි.', 'Skip the day.'),
+      lg('<b>OT අවසන් වේලාව:</b> OT 22:00 දක්වා අනුමත වී ඇතත්, යම් දවසක 18:30 දක්වා පමණක් OT ගන්නේ නම්, ඒ දවසේ පේළියේ ඇති වේලා තේරීමෙන් එය තෝරන්න. 35 අ වවුචරයේ පෙන්වන්නේ ඔබ තෝරාගත් වේලාවයි.', 'Choose an OT end time per day.'),
+      lg('"CLEAR" ඔබා තෝරා ගැනීම ඉවත් කළ හැක.', 'CLEAR removes the choice.')
+    ])); 
+    h += sec(lg('9. කෙටි නිවාඩු සහ වරුවක නිවාඩු', '9. Short leave and half-day leave'), li([
+      lg('සතියේ දවසක ප්‍රමාද වී පැමිණියහොත් හෝ කලින් පිටවුණහොත්, ඒ කාලය නිවාඩුවක් ලෙස සලකා ඒ දවසේ OT වලින් අඩු කරයි. මෙය ප්‍රායෝගිකව බලපාන්නේ රාත්‍රි සේවය හෝ 18:00 ට පසුවත් OT ගන්නා විශේෂ කාල සීමා වලදීයි.', 'Late arrival or early departure on weekdays is treated as leave.'),
+      lg('<b>කෙටි නිවාඩුව</b> – පැය 1½ ක් අඩු වේ. පැමිණීම 09:01–10:00 අතර, හෝ පිටවීම 14:45–16:14 අතර.', 'Short leave deducts 1½ hours.'),
+      lg('<b>වරුවක නිවාඩුව</b> – පැය 3½ ක් අඩු වේ. පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. 12:30 න් පසු පැමිණියහොත් හෝ 12:00 ට පෙර පිටවුණහොත් ඒ දවසේ OT නැත.', 'Half-day leave deducts 3½ hours.'),
+      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ඒවා වරුවක නිවාඩු ලෙස ගණන් වේ. වරුවක නිවාඩු වලට සීමාවක් නැත.', 'Two short leaves per month.'),
+      lg('"මාසය" පිටුවේ දිනය යටතේ "කෙටි නිවාඩුව" / "වරුවක නිවාඩුව" ලෙස පෙන්වයි. ඒවා වෙනස් කිරීමට විශේෂ දින කවුළුවේ ඒ දවසේ පේළියෙන් තෝරන්න.', 'Shown as chips in the month list.'),
+      lg('නිවාඩු ගණනය කරන විට වරු නිවාඩු දෙකක් එක් දිනක් ලෙස සලකයි (උදා: සම්පූර්ණ දින 2 ක් සහ වරු 2 ක් = දින 3 ක්). කෙටි නිවාඩු ඊට ඇතුළත් නොවේ.', 'Two half-days count as one day.')
+    ])); 
+    h += sec(lg('10. සති අන්ත / නිවාඩු දිනවල වැඩ කිරීම', '10. Working on weekends and holidays'), li([
+      lg('සති අන්ත හෝ රජයේ නිවාඩු දිනයක දීමනාව සහ OT ගෙවීමට, ඊට ආසන්න සතියේ දවසක (නිවාඩු දින පෙළට කලින් හෝ පසු) සේවය කර තිබිය යුතුය. උදා: සිකුරාදා 12:30 ට පෙර සිට 16:15 දක්වා, හෝ සඳුදා 09:00 ට පෙර සිට 12:00 දක්වා. එක් පැත්තක් සම්පූර්ණ කළත් ප්‍රමාණවත්.', 'Weekend/holiday pay needs an adjacent weekday to be worked.'),
+      lg('ආසන්න දවස නිවාඩුවක් හෝ හිලව් නිවාඩුවක් නම් එය සේවය කළ දවසක් ලෙස ගණන් නොවේ.', 'A leave day does not count.'),
+      lg('ආසන්න දවසේ වේලාවන් තවම ඇතුළත් කර නැත්නම් ⚠ සලකුණක් පෙන්වයි. ඒවා ඇතුළත් කළාම ස්වයංක්‍රීයව තහවුරු වේ.', 'A warning shows if the adjacent day has no entry yet.')
+    ])); 
+    h += sec(lg('11. වවුචරයේ මුදල අකුරින් පරීක්ෂා කිරීම', '11. Checking the amount in words'), li([
+      lg('වවුචරය විවෘත කළ පසු "🔍 මුදල ඉලක්කමෙන් තිබෙන ආකාරය පරීක්ෂා කරන්න" ඔබන්න. මුදල අකුරින් ලියා ඇති ආකාරය පෙනෙයි.', 'Tap the check button on the voucher.'),
+      lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා වචන ඔබටම හදා සුරකින්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
+    ])); 
+    h += sec(lg('12. Google Lens භාවිතය', '12. Using Google Lens'), li([
+      lg('සැකසුම් → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ට, අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක.', 'Paste printed text instead of typing.'),
+      lg('ෆෝන් එකේ Google Lens (හෝ Google ඇප්) විවෘත කර මුද්‍රිත ලැයිස්තුව දෙසට කැමරාව යොමු කරන්න. "Text" තෝරා, අවශ්‍ය කොටස තෝරා "Copy text" ඔබන්න.', 'Open Google Lens and copy the text.'),
+      lg('OT ඇප් එකට ආපසු ගොස් "අතිකාල රාජකාරි විස්තරය" කොටුවේ ඔබාගෙන සිට "Paste" කරන්න. අවශ්‍ය නම් සංස්කරණය කර SAVE කරන්න.', 'Paste into the description box and save.')
+    ])); 
+    h += sec(lg('SAVE SETTINGS', '13. Saving settings'), li([
+      lg('සැකසුම් පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
+      lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යන්න බැහැ; අනතුරු ඇඟවීමක් එයි. "සැකසුම් → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
+    ])); 
+    h += sec(lg('About App', '14. About the app'), li([
+      lg('සැකසුම් → ඇප් පිටුවේ "About App" සහ "About Developer" බොත්තම් ඇත. ඒවා සැකසුම් ලොක් වී තිබුණත් භාවිත කළ හැක.', 'About App and About Developer are in Settings → App.'),
+      lg('මෙම ඇප් එක රජයේ නිල ඇප් එකක් නොවේ. ගණනය කිරීම් සහ වවුචර් භාවිතයට පෙර ආයතනයේ නීති රීති සමඟ ගැලපෙනවාදැයි ඔබම පරීක්ෂා කර ගන්න.', 'Not an official app.')
+    ])); 
     return h;
   }
 
@@ -686,7 +728,7 @@
     if (n < 10) return (unit === 'දහස' ? SIm[n] : SIu[n] + ' ') + unit;
     return siBelow1000(n) + ' ' + unit;
   }
-  function siWords(n) {
+  function siWords(n, noYi) {
     n = Math.floor(n);
     if (n === 0) return 'ශූන්‍ය';
     const parts = [];
@@ -696,7 +738,7 @@
     if (t) parts.push(t < 10 ? (t === 1 ? 'එක් දහස' : SIm[t] + 'දහස') : siPre(t) + (r ? ' දහස්' : ' දහස'));
     if (r) parts.push(siBelow1000(r));
     let w = parts.join(' ');
-    return w + 'යි';
+    return noYi ? w : w + 'යි';
   }
   const EDA = (css) => { const m = css && /--ed:([a-z0-9]+)/.exec(css); return m ? ' data-w="' + m[1] + '"' : ''; };
   /* saved edits of the amount-in-words text: DB.wordsOv[kind|month] = { amt, v:{key:text} } */
@@ -740,7 +782,7 @@
     f += R(386, 456, 448, rsTxt) + R(462, 488, 448, ctsTxt);
     f += R(386, 456, 497, rsTxt, 'font-weight:700') + R(462, 488, 497, ctsTxt, 'font-weight:700');
     if (LANG() === 'en') f += A(140, 641, wOv('al', mk, 'ew1', amount, numWords(rs)), 'font-size:9pt;--ed:ew1') + A(202, 669, wOv('al', mk, 'ew2', amount, cts ? numWords(cts) : 'Nil'), 'font-size:9pt;--ed:ew2');
-    else f += A(372, 526, wOv('al', mk, 'sw1', amount, siWords(rs)), 'font-size:9pt;--ed:sw1') + A(92, 553, wOv('al', mk, 'sw2', amount, cts ? siWords(cts) : '—'), 'font-size:9pt;--ed:sw2');
+    else f += A(372, 526, wOv('al', mk, 'sw1', amount, siWords(rs, true)), 'font-size:9pt;--ed:sw1') + A(92, 553, wOv('al', mk, 'sw2', amount, cts ? siWords(cts, true) : '—'), 'font-size:9pt;--ed:sw2');
     f += '</div>';
     /* back page: table of eligible days, placed in the blank area at the top */
     const rows = (s.allowRows || []).slice(0, 32).map((r, i) => {
