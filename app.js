@@ -22,10 +22,11 @@
   function load() {
     try {
       const j = JSON.parse(localStorage.getItem(KEY));
-      if (j) return { settings: OT.mergeSettings(j.settings), entries: j.entries || {}, claims: j.claims || {}, wordsOv: j.wordsOv || {} };
+      if (j) return { settings: fixStation(OT.mergeSettings(j.settings)), entries: j.entries || {}, claims: j.claims || {}, wordsOv: j.wordsOv || {} };
     } catch (e) { /* ignore */ }
     return { settings: OT.mergeSettings(null), entries: {}, claims: {} };
   }
+  function fixStation(s) { s.station = STATION; return s; }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) { toast('දත්ත SAVE කිරීමට නොහැකි විය'); }
   }
@@ -33,6 +34,7 @@
   /* ---------- helpers ---------- */
   const $ = (s, r) => (r || document).querySelector(s);
   const APP_VER = 'v23';
+  const STATION = 'ශික්‍ෂණ රෝහල, පේරාදෙණිය';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
   const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් කාර්යාල නිලධාරියකුට භාවිතා කිරීමට පහසු වන අයුරින් සකස් කර ඇත. කැමති ඕනෑම කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
@@ -387,8 +389,8 @@
     const ybm = body.match(/<!--YB-->([\s\S]*?)<!--\/YB-->/); const yb = ybm ? ybm[1] : '';
     const banner = lk ? '<div style="margin-bottom:12px"><button class="btn alt block" data-a="unlock">🔒 ' + lg('CHANGE SETTINGS', 'Edit settings') + '</button></div>' : '';
     const idx = STABS.findIndex((x) => x[0] === st);
-    const arrows = '<div class="row" style="gap:10px;margin-top:10px">' + (idx > 0 ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="-1">◀</button>' : '<span style="flex:1"></span>') +
-      (idx < STABS.length - 1 ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="1">▶</button>' : '<span style="flex:1"></span>') + '</div>';
+    const arrows = '<div class="row" style="gap:10px;margin-top:10px">' + (false ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="-1">◀</button>' : '<span style="flex:1"></span>') +
+      (false ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="1">▶</button>' : '<span style="flex:1"></span>') + '</div>';
     const save = lk ? '' : '<button class="btn gold block" id="saveBtn" data-a="savenext">SAVE</button>';
     return strip + banner + yb + '<fieldset ' + (lk ? 'disabled' : '') + ' style="border:0;padding:0;margin:0;min-width:0">' + body.replace(/<!--YB-->[\s\S]*?<!--\/YB-->/, '') + '</fieldset>' + outside + save + arrows;
   }
@@ -419,10 +421,10 @@
     const S = DB.settings, st = view.st || 'me';
     let h = '<div class="seg stabs">' + STABS.map(([k, n]) => '<button class="' + (k === st ? 'on' : '') + '" data-a="stab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
     if (st === 'me') {
-      h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + fld('සේවා ස්ථානය', 'station', 'text') + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
+      h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + '<label class="f"><span>සේවා ස්ථානය</span><input type="text" value="' + esc(STATION) + '" readonly disabled></label>' + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
       h += '<div class="card"><h2>පොදු 35 අ වවුචරය</h2>' + fld('ගෙවීම් ශාඛාව', 'payUnit', 'text') +
         fld('විෂය සංකේතය (උදා: AA, AB)', 'subjectCode', 'text') +
-        area('අතිකාල රාජකාරි විස්තරය', 'workDesc', 6, 'දිගු විස්තරයක් නම් කොටස් වශයෙන් අනු අංක යටතේ ලියන්න (1. ... 2. ...). Enter ඔබා නව පේළියක් ආරම්භ කරන්න. හිස් නම් වවුචරයේ විෂය සංකේත වාක්‍යය පමණක් මුද්‍රණය වේ. අතින් ටයිප් නොකර, මුද්‍රිත ලැයිස්තුව Google Lens එකෙන් Copy කරලා මෙතනට Paste කරන්නත් පුළුවන්.') + '</div>';
+        area('අතිකාල රාජකාරි විස්තරය', 'workDesc', 6, 'දිගු විස්තරයක් නම් කොටස් වශයෙන් අනු අංක යටතේ ලියන්න (1. ... 2. ...). Enter ඔබා නව පේළියක් ආරම්භ කරන්න. හිස් නම් වවුචරයේ විෂය සංකේත වාක්‍යය පමණක් මුද්‍රණය වේ. අතින් ටයිප් නොකර, මුද්‍රිත ලැයිස්තුව Google Lens එකෙන් Copy කරලා මෙතනට Paste කරන්නත් පුළුවන්. <button type="button" data-a="helplens" style="background:none;border:0;padding:0;color:var(--gold,#b8860b);font:inherit;font-weight:700;text-decoration:underline">විස්තර සඳහා උදව් පිටුව බලන්න ➜</button>') + '</div>';
     } else if (st === 'pay') {
       h += '<div class="card"><h2>OT සහ PH ගණනය කිරීමේ අනුපාත</h2>' +
         fld('OT පැයක අනුපාතය', 'otDivisor', 'number', '', 'මූලික වැටුප ÷') + fld('දෛනික දීමනාව', 'allowanceDivisor', 'number', '', 'මූලික වැටුප ÷') +
@@ -451,7 +453,6 @@
         '<label class="btn alt sm" style="cursor:pointer">RESTORE FROM BACKUP FILE<input type="file" accept="application/json" id="restore" hidden></label></div>' +
         '<p class="mute" style="margin-bottom:0">Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ, ඒ නිසා දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.</p></div>';
       h += '<!--OUT-->';
-      h += '<button class="btn block" style="margin-top:12px" data-a="tab" data-t="help">❓ උදවු / භාවිත මාර්ගෝපදේශය</button>';
       h += '<div class="card" style="text-align:center;margin-top:12px"><div style="display:flex;justify-content:center;margin-bottom:10px">' + nrLogo(72) + '</div>' +
         '<button class="btn block" data-a="aboutapp">About App</button><div id="aboutAppBox" style="display:none;margin:10px 0;text-align:left"><div style="font-weight:700">OT Calculator · v' + APP_VER.replace('v', '') + '</div><div class="mute" style="margin-top:6px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div></div>' +
         '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
@@ -461,7 +462,7 @@
 
   /* ---------- help ---------- */
   function renderHelp() {
-    const sec = (title, body) => HELP_READY ? '<details class="card help"><summary><b>' + title + '</b></summary><div class="hb">' + body + '</div></details>' : '<div class="card help" data-a="helpna" style="cursor:pointer"><b>' + title + '</b></div>';
+    const sec = (title, body) => HELP_READY ? '<details class="card help"' + (view.helpOpen && title.indexOf(view.helpOpen) >= 0 ? ' open' : '') + '><summary><b>' + title + '</b></summary><div class="hb">' + body + '</div></details>' : '<div class="card help" data-a="helpna" style="cursor:pointer"><b>' + title + '</b></div>';
     const li = (arr) => '<ul>' + arr.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
     let h = '<div class="row sb" style="margin-bottom:10px"><b>' + lg('භාවිත මාර්ගෝපදේශය', 'User guide') + '</b>' + (EN_ON ? '<div class="seg" style="margin:0;width:170px"><button class="' + (LANG() === 'si' ? 'on' : '') + '" data-a="setlang" data-l="si">සිංහල</button><button class="' + (LANG() === 'en' ? 'on' : '') + '" data-a="setlang" data-l="en">English</button></div>' : '') + '</div>';
     h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([
@@ -657,7 +658,7 @@
   }
   function head(title, mk, p) {
     return '<h1>' + title + '</h1><h2>' + monthLabel(mk) + ' මාසය</h2><div class="meta"><b>නම:</b><span>' + esc(p.name || '………………………') + '</span><b>තනතුර:</b><span>' + esc(p.designation || '………………………') +
-      '</span><b>සේවා ස්ථානය:</b><span>' + esc(p.station || p.division || '………………………') + '</span><b>මූලික වැටුප:</b><span>' + money(p.baseSalary) + '</span></div>';
+      '</span><b>සේවා ස්ථානය:</b><span>' + esc(STATION) + '</span><b>මූලික වැටුප:</b><span>' + money(p.baseSalary) + '</span></div>';
   }
   function sigs() {
     return '<div class="sig"><div>අයදුම්කරුගේ අත්සන සහ දිනය</div><div>අනුමත කරන නිලධාරියාගේ අත්සන සහ දිනය</div></div>';
@@ -747,7 +748,7 @@
     R: (x0, x1, top, txt, css) => '<div class="a" style="left:' + x0 + 'pt;width:' + (x1 - x0) + 'pt;top:' + top + 'pt;text-align:right;' + (css || '') + '">' + esc(txt) + '</div>' };
   function g35Voucher(c, mk) {
     const s = c.sum, S = DB.settings, p = c.profile || {};
-    const station = p.station != null ? p.station : S.station;
+    const station = STATION;
     const salNo = p.salaryNo != null ? p.salaryNo : S.salaryNo;
     const pr = Object.assign({ fx: 0, fy: 0, bx: 0, by: 0, rotBack: false }, S.print || {}, p.print || {});
     const [y, m] = mk.split('-').map(Number);
@@ -855,7 +856,7 @@
     const A = g35.A;
     const fmt2 = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const tag = (ds) => { const w = new Date(ds + 'T00:00:00').getDay(); return w === 6 ? 'SA' : w === 0 ? 'SU' : hol[ds] ? 'PH' : ''; };
-    const station = p.station != null ? p.station : S.station;
+    const station = STATION;
     const wdesc = p.workDesc != null ? p.workDesc : S.workDesc;
     const scode = p.subjectCode != null ? p.subjectCode : S.subjectCode;
     const salNo = p.salaryNo != null ? p.salaryNo : S.salaryNo;
@@ -1045,6 +1046,7 @@
     about() { const b = document.getElementById('aboutBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     unlock() { DB.settings.locked = false; view.dirty = true; save(); render(); },
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
+    helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'Google Lens'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
     prev() { shiftMonth(-1); render(); },
@@ -1209,7 +1211,7 @@
           const j = JSON.parse(t); const d = j.data || j;
           if (!d.entries && !d.settings) throw new Error('bad');
           if (!confirmT('දැනට ඇති දත්ත BACKUP FILE එකෙන් ආදේශ කරන්නද?')) return;
-          DB = { settings: OT.mergeSettings(d.settings), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {} }; DB.settings.locked = false; view.dirty = true; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED. SAVE');
+          DB = { settings: fixStation(OT.mergeSettings(d.settings)), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {} }; DB.settings.locked = false; view.dirty = true; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED. SAVE');
         } catch (err) { toast('ගොනුව වැරදියි', true); }
       });
       return;
