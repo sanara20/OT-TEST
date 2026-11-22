@@ -27,6 +27,10 @@
     } catch (e) { try { const raw = localStorage.getItem(KEY); if (raw && !localStorage.getItem(KEY + '.bad')) localStorage.setItem(KEY + '.bad', raw); } catch (e2) { /* ignore */ } }
     return { settings: OT.mergeSettings(null), entries: {}, claims: {} };
   }
+  function ensureLegacy(d) {
+    const S = d.settings;
+    if (S.legacy === undefined) S.legacy = Object.keys(d.entries || {}).length > 0 || Number(S.baseSalary) > 0 || !!S.name;
+  }
   function fixStation(s) { s.station = STATION; return s; }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) { toast('දත්ත SAVE කිරීමට නොහැකි විය'); }
@@ -96,7 +100,7 @@
     document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.t === view.tab));
     const showNav = view.tab === 'home' || view.tab === 'month';
     document.querySelectorAll('header.top .iconbtn,#mname').forEach((e) => { e.style.visibility = showNav ? 'visible' : 'hidden'; });
-    $('#ttl').textContent = { home: 'OT ගණකය', month: 'මාසික සටහන', claims: 'වවුචර්', settings: 'SETTINGS', help: 'උදවු' }[view.tab];
+    $('#ttl').textContent = { home: 'OT Calculator', month: 'මාසික සටහන', claims: 'වවුචර්', settings: 'SETTINGS', help: 'උදවු' }[view.tab];
     const app = $('#app');
     if (view.tab === 'home') app.innerHTML = renderHome();
     else if (view.tab === 'month') app.innerHTML = renderMonth();
@@ -203,6 +207,7 @@
       (sm.excessDays > 0 ? '<span style="color:var(--bad)">සීමාව ඉක්මවූ දින (නොගෙවේ)</span><b style="color:var(--bad)">' + sm.excessDays + '</b>' : '') +
       '<div class="sep"></div><span><b>TOTAL</b></span><b>' + money(sm.otAmount + sm.allowAmount) + '</b></div>' +
       '<button class="btn alt block" style="margin-top:10px" data-a="viewsum">සාරාංශය බලන්න</button></div>';
+    if (DB.settings.baseSalary && DB.settings.legacy && (!String(DB.settings.name || '').trim() || !String(DB.settings.designation || '').trim())) out += '<div class="banner" style="background:var(--warnbg,#fff4d6);color:var(--warn,#7a5200)"><span>ඔබේ නම සහ තනතුර SETTINGS → පුද්ගලික පිටුවේ ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ)</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
     if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
     out += installCard();
     { const by = OT.builtinYears(window.LK_HOLIDAYS), now = new Date(), cy = now.getFullYear(), ex = DB.settings.holidayExtra || {};
@@ -383,7 +388,7 @@
     const S = DB.settings, st = view.st || 'me';
     const h0 = renderSettings0();
     if (S.locked && typeof S.locked === 'object') S.locked = !!(S.locked.me || S.locked.pay); /* migrate older flag */
-    const lk = S.locked === true;
+    const grp = grpOf(st); const lk = curLocked(st);
     const i = h0.indexOf('</div>') + 6; /* after the tab strip */
     const strip = h0.slice(0, i), full = h0.slice(i), oi = full.indexOf('<!--OUT-->'), body = oi < 0 ? full : full.slice(0, oi), outside = oi < 0 ? '' : full.slice(oi + 10);
     const ybm = body.match(/<!--YB-->([\s\S]*?)<!--\/YB-->/); const yb = ybm ? ybm[1] : '';
@@ -391,7 +396,7 @@
     const idx = STABS.findIndex((x) => x[0] === st);
     const arrows = '<div class="row" style="gap:10px;margin-top:10px">' + (false ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="-1">◀</button>' : '<span style="flex:1"></span>') +
       (false ? '<button class="btn alt" style="flex:1;font-size:22px" data-a="snav" data-d="1">▶</button>' : '<span style="flex:1"></span>') + '</div>';
-    const save = lk ? '' : '<button class="btn gold block" id="saveBtn" data-a="savenext">SAVE</button>';
+    const save = (lk || grp === 'app') ? '' : '<button class="btn gold block" id="saveBtn" data-a="savenext">SAVE</button>';
     return strip + banner + yb + '<fieldset ' + (lk ? 'disabled' : '') + ' style="border:0;padding:0;margin:0;min-width:0">' + body.replace(/<!--YB-->[\s\S]*?<!--\/YB-->/, '') + '</fieldset>' + outside + save + arrows;
   }
   const DESIGS = ['රාජ්‍ය සෞඛ්‍ය කළමනාකරණ සහකාර', 'සංවර්ධන නිලධාරී'];
@@ -402,19 +407,26 @@
     o += '<option value="__o"' + (other ? ' selected' : '') + '>' + lg('වෙනත්', 'Other') + '</option></select></label>';
     return o + '<div id="desOther" style="display:' + (other ? 'block' : 'none') + '">' + fld(lg('වෙනත් තනතුර ටයිප් කරන්න', 'Type your designation'), 'designation', 'text') + '</div>';
   }
-  function goProfile(msg) {
+  function goField(path, msgText) {
     if (view.tab === 'settings' && guardLeave()) return;
     closeSheet(); view.tab = 'settings'; view.st = 'me'; render();
-    if (msg) toast(lg('පළමුව මූලික තොරතුරු ඇතුළත් කරන්න', 'Enter the basic details first'), true);
-    const b = document.querySelector('input[data-p=baseSalary]');
-    const t = b ? (b.closest('.card') || b) : null;
-    if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (b) { b.style.outline = '3px solid #dc2626'; setTimeout(() => { b.style.outline = ''; }, 2500); } } else window.scrollTo(0, 0);
+    if (msgText) toast(msgText, true);
+    const b = document.querySelector('[data-p="' + path + '"], [data-c=desig]');
+    const el = path === 'designation' ? document.querySelector('[data-c=desig]') : document.querySelector('[data-p="' + path + '"]');
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.outline = '3px solid #dc2626'; setTimeout(() => { el.style.outline = ''; }, 2500); } else window.scrollTo(0, 0);
   }
-  function needProfile() {
+  const FLD_LBL = { name: 'නම', designation: 'තනතුර', baseSalary: 'මූලික වැටුප', salaryNo: 'වැටුප් අංකය', workDesc: 'අතිකාල රාජකාරි විස්තරය', payUnit: 'ගෙවීම් ශාඛාව' };
+  function missingFields(list) {
     const S = DB.settings;
-    if (Number(S.baseSalary) || S.otRate) return false;
-    goProfile(true); return true;
+    return list.filter((k) => (k === 'baseSalary' ? !(Number(S.baseSalary) || S.otRate) : !String(S[k] || '').trim()));
   }
+  function requireFields(list, first) {
+    const miss = missingFields(list); if (!miss.length) return false;
+    goField(miss[0], (first ? 'පළමුව මූලික තොරතුරු ඇතුළත් කරන්න: ' : 'වවුචරය සැකසීමට පළමුව ඇතුළත් කරන්න: ') + miss.map((k) => FLD_LBL[k]).join(', '));
+    return true;
+  }
+  function goProfile() { goField(missingFields(['baseSalary', 'name', 'designation'])[0] || 'name', ''); }
+  function needProfile() { return requireFields(DB.settings.legacy ? ['baseSalary'] : ['name', 'designation', 'baseSalary'], true); }
   function capGuard() {
     if (!(view.tab === 'settings' && view.capDirty)) return false;
     const b = document.querySelector('[data-a=addcap]');
@@ -422,9 +434,15 @@
     toast(lg('වෙනස්කම් SAVE කරන්න.', 'Press "Save limit" to save the limit first'), true);
     return true;
   }
+  function grpOf(st) { return st === 'app' ? 'app' : (st === 'me' || !st ? 'me' : 'x'); }
+  function curLocked(st) {
+    st = st || view.st || 'me'; const g = grpOf(st), S = DB.settings;
+    if (g === 'app') return false;
+    return g === 'me' ? S.locked === true : S.lockedX !== false;
+  }
   function guardLeave() {
     if (capGuard()) return true;
-    if (!(view.tab === 'settings' && view.dirty && DB.settings.locked !== true)) return false;
+    if (!(view.tab === 'settings' && view.dirty && grpOf(view.st || 'me') !== 'app' && !curLocked())) return false;
     const b = document.getElementById('saveBtn');
     if (b) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); b.style.outline = '4px solid #dc2626'; setTimeout(() => { b.style.outline = ''; }, 1500); }
     toast(lg('මෙම පිටුවේ වෙනස්කම් SAVE කරන්න', 'Please SAVE your changes first'), true);
@@ -642,7 +660,7 @@
       LN.cancel({ notifications: [{ id: 1 }] }).catch(() => {});
       if (!DB.settings.reminderOn) return;
       const t = OT.toMin(DB.settings.reminderTime);
-      LN.requestPermissions().then(() => LN.schedule({ notifications: [{ id: 1, title: tr('OT ගණකය'), body: tr('අද පැමිණීම / පිටවීම සටහන් කරන්න.'), schedule: { on: { hour: Math.floor(t / 60), minute: t % 60 }, allowWhileIdle: true } }] })).catch(() => {});
+      LN.requestPermissions().then(() => LN.schedule({ notifications: [{ id: 1, title: tr('OT Calculator'), body: tr('අද පැමිණීම / පිටවීම සටහන් කරන්න.'), schedule: { on: { hour: Math.floor(t / 60), minute: t % 60 }, allowWhileIdle: true } }] })).catch(() => {});
     } catch (e) { /* ignore */ }
   }
   function notify(title, body, warn) {
@@ -1041,6 +1059,7 @@
     savenext() {
       if (capGuard()) return;
       const S = DB.settings;
+      if (grpOf(view.st || 'me') === 'x') { S.lockedX = true; view.dirty = false; save(); view.tab = 'home'; render(); window.scrollTo(0, 0); toast(lg('SAVED. SETTINGS LOCKED.', 'Saved – settings locked')); return; }
       if (!Number(S.baseSalary) && !S.otRate) { view.st = 'me'; render(); return toast(lg('මූලික වැටුප ඇතුළත් කරන්න', 'Enter the basic salary'), true); }
       S.locked = true; view.dirty = false; save();
       view.tab = 'home'; render(); window.scrollTo(0, 0); toast(lg('SAVED. SETTINGS LOCKED.', 'Saved – settings locked'));
@@ -1053,7 +1072,7 @@
     viewsum() { view.tab = 'month'; render(); const e = document.getElementById('mSum'); if (e) e.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); },
     aboutapp() { const b = document.getElementById('aboutAppBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     about() { const b = document.getElementById('aboutBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
-    unlock() { DB.settings.locked = false; view.dirty = true; save(); render(); },
+    unlock() { if (grpOf(view.st || 'me') === 'x') DB.settings.lockedX = false; else DB.settings.locked = false; view.dirty = true; save(); render(); },
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
     helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'Google Lens'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
@@ -1061,7 +1080,7 @@
     prev() { shiftMonth(-1); render(); },
     next() { shiftMonth(1); render(); },
     edit(el) { if (needProfile()) return; openEditor(el.dataset.d); },
-    gotoprofile() { goProfile(false); },
+    gotoprofile() { goProfile(); },
     closeSheet,
     togcal() { view.showCal = !view.showCal; render(); },
     gotoday() { view.month = todayStr().slice(0, 7); render(); },
@@ -1110,7 +1129,7 @@
       checkCapAlert(draftDate.slice(0, 7));
     },
     cleardraft() { delete DB.entries[draftDate]; save(); closeSheet(); render(); },
-    claim() { if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
+    claim() { if (requireFields(['name', 'designation', 'baseSalary', 'salaryNo', 'workDesc', 'payUnit'], false)) return; if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
     spmanual() { spPopup(true); },
     claimgo() {
       const p = document.getElementById('spop'); if (p) p.remove();
@@ -1245,7 +1264,7 @@
           const j = JSON.parse(t); const d = j.data || j;
           if (!d.entries && !d.settings) throw new Error('bad');
           if (!confirmT('දැනට ඇති දත්ත BACKUP FILE එකෙන් ආදේශ කරන්නද?')) return;
-          DB = { settings: fixStation(OT.mergeSettings(d.settings)), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {} }; DB.settings.locked = false; view.dirty = true; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED. SAVE');
+          DB = { settings: fixStation(OT.mergeSettings(d.settings)), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {} }; ensureLegacy(DB); DB.settings.locked = true; DB.settings.lockedX = true; view.dirty = false; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED');
         } catch (err) { toast('ගොනුව වැරදියි', true); }
       });
       return;
@@ -1304,7 +1323,7 @@
     if (DB.entries[t]) return;
     if (n.getHours() * 60 + n.getMinutes() >= OT.toMin(S.reminderTime) && lastRem !== t) {
       lastRem = t;
-      notify('OT ගණකය', 'අද පැමිණීම / පිටවීම සටහන් කරන්න.');
+      notify('OT Calculator', 'අද පැමිණීම / පිටවීම සටහන් කරන්න.');
       if (view.tab === 'home') render();
     }
   }
@@ -1381,7 +1400,7 @@
       ov.innerHTML = '<div style="font-size:42px">✅</div><div style="font-size:19px;font-weight:700;max-width:320px;line-height:1.6">' +
         lg('සාර්ථක ලෙස ඇප් එක install විය. පහත Close බොත්තම ඔබා, ෆෝන් එකේ ඇප් අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'The app was installed successfully. Tap Close below, then open the app from its icon on your phone.') + '</div>' +
         '<button id="instClose" style="' + bs + '">' + lg('Close', 'Close') + '</button><div id="instNote" style="display:none;opacity:.85;font-size:14px;max-width:300px">' +
-        lg('Chrome ස්වයංක්‍රීයව වැසෙන්නේ නැත්නම් Chrome වසා, ෆෝන් එකේ "OT ගණකය" අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'If Chrome does not close by itself, close it and open the "OT" icon on your phone.') + '</div>';
+        lg('Chrome ස්වයංක්‍රීයව වැසෙන්නේ නැත්නම් Chrome වසා, ෆෝන් එකේ "OT Calculator" අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'If Chrome does not close by itself, close it and open the "OT" icon on your phone.') + '</div>';
       ov.querySelector('#instClose').onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { const n = document.getElementById('instNote'); if (n) n.style.display = 'block'; }, 400); };
     };
     ov.querySelector('#instSkip').onclick = () => { DB.settings.onboarded = true; save(); ov.remove(); showDetails(); };
@@ -1402,10 +1421,11 @@
     if (!S.onboarded && !S.installed && !isStandalone()) return showInstallScreen();
     showDetails();
   }
-  if (!DB.settings.lang) { DB.settings.lang = 'si'; save(); } /* language chooser removed – Sinhala only */
+  ensureLegacy(DB);
+  if (!DB.settings.lang) { DB.settings.lang = 'si'; save(); } else save(); /* language chooser removed – Sinhala only */
   startFlow();
   { const sp = document.getElementById('splash'); if (sp) setTimeout(() => { sp.style.opacity = '0'; setTimeout(() => sp.remove(), 450); }, Math.max(0, 2500 - performance.now())); }
-  window.addEventListener('beforeunload', (e) => { if (view.tab === 'settings' && (view.dirty || view.capDirty) && DB.settings.locked !== true) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if (view.tab === 'settings' && (view.dirty || view.capDirty) && grpOf(view.st || 'me') !== 'app' && !curLocked()) { e.preventDefault(); e.returnValue = ''; } });
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
   { const hd = document.querySelector('header.top'); if (hd) document.documentElement.style.setProperty('--hh', hd.offsetHeight + 'px'); }
   render();

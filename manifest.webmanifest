@@ -1,7 +1,7 @@
 {
   "id": "./index.html",
-  "name": "OT ගණකය",
-  "short_name": "OT ගණකය",
+  "name": "OT Calculator",
+  "short_name": "OT Calculator",
   "description": "අතිකාල සහ දෛනික දීමනා ගණනය",
   "start_url": "./index.html",
   "scope": "./",
