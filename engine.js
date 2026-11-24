@@ -206,7 +206,7 @@
     const eveTotal = (lateDeduct, nightDeduct) => Math.max(0, eve - lateDeduct) + Math.max(0, night - (nightDeduct || 0)) + extra;
 
     if (type === 'weekday') {
-      // short leave (1.5 h) / half-day (3.5 h): late arrival, or early departure, covered from that day's OT
+      // leave rules: a short leave (1.5 h, one block) / half-day (3.5 h) / uncovered late; lost time is cut from the day's total OT
       let lv = null, lvSide = '';
       const tlate = late > S.graceMin;
       const shortLast = st + (S.shortLeaveMin || 90), halfLast = toMin(S.halfLateIn || '12:30');
@@ -218,28 +218,49 @@
       let exitT = null, endT = null;
       if (!overnight) { exitT = tout; endT = en; }
       else if ((ctx.nextType || 'weekday') === 'weekday' && tout - 1440 > toMin(S.duty.weekday.s)) { exitT = tout - 1440; endT = toMin(S.duty.weekday.e); }
-      if (exitT != null && exitT < endT) {
+      const early = exitT != null && exitT < endT;
+      if (early && (late > 0)) {
+        // two separate lost parts in one day (late + early) = a half-day; also covers ~4 h mid-day service
+        res.leave = 'half'; res.leaveSide = 'both'; res.uncovered = false;
+        res.code = (!overnight && tout - tin < 240) ? 'W_BOTH_UNDER4' : 'W_BOTH_HALF';
+        return res;
+      }
+      if (early) {
         const shortFirst = endT - (S.shortLeaveMin || 90);
         const halfFirst = toMin(S.halfEarlyOut || '12:00');
-        if (lv && !overnight) { res.leave = 'both'; res.code = 'W_LATE_AND_EARLY'; return res; }
-        if (!lv) {
-          if (exitT >= shortFirst) { lv = 'short'; lvSide = 'pm'; }
-          else if (exitT >= halfFirst || overnight) { lv = 'half'; lvSide = 'pm'; }
-          else { res.leave = 'half'; res.leaveSide = 'pm'; res.code = 'W_EARLY_OVER'; return res; }
+        if (exitT >= shortFirst) { lv = 'short'; lvSide = 'pm'; }
+        else if (exitT >= halfFirst || overnight) { lv = 'half'; lvSide = 'pm'; }
+        else { res.leave = 'half'; res.leaveSide = 'pm'; res.code = 'W_EARLY_OVER'; return res; }
+      }
+      // late within the grace period (08:31-09:00) that is not covered in the evening
+      if (!lv && late > 0 && !overnight && tout < en + lateChunk) {
+        res.uncovered = true;
+        const free = ctx.lateFree == null ? (S.freeLatesPerMonth == null ? 2 : S.freeLatesPerMonth) : ctx.lateFree;
+        if (free <= 0) {
+          if ((entry.lateLeave === 'short' || entry.lvOverride === 'short') && (ctx.slLeft == null || ctx.slLeft > 0)) { lv = 'short'; lvSide = 'am'; }
+          else { lv = 'half'; lvSide = 'am'; res.lateHalf = true; }
         }
       }
-      if (entry.lvOverride === 'short' || entry.lvOverride === 'half') { if (lv) lv = entry.lvOverride; }
-      else if (lv === 'short' && ctx.slLeft != null && ctx.slLeft <= 0) lv = 'half';
+      // short leave taken in the middle of the day (marked in the special-days popup)
+      if (!lv && entry.special === 'mshort') { lv = 'short'; lvSide = 'mid'; }
+      if (entry.lvOverride === 'short' || entry.lvOverride === 'half') { if (lv && lvSide !== 'mid') lv = entry.lvOverride; }
+      else if (lv === 'short' && lvSide !== 'mid' && !(res.uncovered && (entry.lateLeave === 'short' || entry.lvOverride === 'short')) && ctx.slLeft != null && ctx.slLeft <= 0) lv = 'half';
+      else if (lv === 'short' && lvSide === 'mid' && ctx.slLeft != null && ctx.slLeft <= 0) lv = 'half';
       if (lv) { res.leave = lv; res.leaveSide = lvSide; }
       const ded = lv === 'short' ? (S.shortLeaveMin || 90) : lv === 'half' ? (S.halfLeaveMin || 210) : 0;
       let r;
-      if (lv && lvSide === 'am') r = applyMin(0, eveTotal(ded, 0), S);
-      else if (lv && lvSide === 'pm') {
-        // morning OT cannot cover a leave on its own; only the overnight continuation is paid (less the deduction)
-        r = applyMin(0, overnight ? eveTotal(0, ded) : 0, S);
-      } else r = applyMin(rawM, eveTotal(tlate ? 0 : lateChunk, 0), S);
-      res.morning = r.m; res.evening = r.e; res.ot = r.ot;
-      if (lv && lvSide === 'pm' && overnight) res.night = Math.max(0, night - ded) + extra;
+      if (lv) {
+        // cut the lost time from the day's total OT: evening/night side first, then morning
+        const side = eve + night + extra;
+        const fromSide = Math.min(ded, side), fromMorn = ded - fromSide;
+        const eNight = Math.max(0, night + extra - Math.max(0, fromSide - eve));
+        r = applyMin(Math.max(0, rawM - fromMorn), side - fromSide, S);
+        res.night = overnight ? eNight : 0;
+        res.morning = r.m; res.evening = r.e; res.ot = r.ot;
+      } else {
+        r = applyMin(rawM, eveTotal(tlate || res.uncovered ? (res.uncovered ? lateChunk : 0) : lateChunk, 0), S);
+        res.morning = r.m; res.evening = r.e; res.ot = r.ot;
+      }
       res.post = overnight && r.e > 0 ? res.night : 0;
       res.code = lv ? (r.ok ? 'W_LEAVE_OK' : 'W_LEAVE_BELOW_MIN') : (r.ok ? 'W_OK' : 'W_BELOW_MIN');
       if (!r.ok) res.allowNext = false;
@@ -320,7 +341,7 @@
     const allowRows = [];
     let otMin = 0, allowDays = 0, leaveDays = 0, offDays = 0, workedDays = 0;
     const contDates = {};
-    let slUsed = 0, slTotal = 0, halfDays = 0;
+    let slUsed = 0, slTotal = 0, halfDays = 0, lateCnt = 0, lateHalf = 0, midShort = 0;
     // an overnight entry on the last day of the previous month may continue into day 1
     const prev = addDays(monthKey + '-01', -1);
     const pe = entries[prev];
@@ -342,9 +363,11 @@
         entry = entry || null;
       } else {
         const nextDs = addDays(ds, 1);
-        res = calcDay(entry, type, S, { cutoff: cutoffFor(ds, S), nextType: dayTypeOf(nextDs, holidays), slLeft: (S.shortLeavesPerMonth == null ? 2 : S.shortLeavesPerMonth) - slUsed });
-        if (res.leave === 'short') slUsed++;
+        res = calcDay(entry, type, S, { cutoff: cutoffFor(ds, S), nextType: dayTypeOf(nextDs, holidays), slLeft: (S.shortLeavesPerMonth == null ? 2 : S.shortLeavesPerMonth) - slUsed, lateFree: (S.freeLatesPerMonth == null ? 2 : S.freeLatesPerMonth) - lateCnt });
+        if (res.leave === 'short') { slUsed++; if (res.leaveSide === 'mid') midShort++; }
         if (res.leave === 'half') halfDays++;
+        if (res.uncovered) lateCnt++;
+        if (res.lateHalf) lateHalf++;
         if (type !== 'weekday' && res.valid && res.kind === 'worked') {
           const aj = adjacency(ds, entries, S, holidays);
           res.adj = aj.state;
@@ -385,7 +408,7 @@
     return {
       month: monthKey, rows, allowRows, otMin, payMin, excessMin: otMin - payMin, capH, capMin,
       allowDays, allowPay, excessDays: allowDays - allowPay, dayCap,
-      shortLeaves: slUsed, halfDays, shortLeaveCap: S.shortLeavesPerMonth == null ? 2 : S.shortLeavesPerMonth,
+      shortLeaves: slUsed, halfDays, lateUncovered: lateCnt, lateFreeCap: S.freeLatesPerMonth == null ? 2 : S.freeLatesPerMonth, lateHalf, midShort, shortLeaveCap: S.shortLeavesPerMonth == null ? 2 : S.shortLeavesPerMonth,
       leaveDays, offDays, workedDays, hourly: rt.hourly, daily: rt.daily,
       otAmount: round2((payMin / 60) * rt.hourly),
       allowAmount: round2(allowPay * rt.daily),

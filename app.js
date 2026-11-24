@@ -75,7 +75,12 @@
 
   /* ---------- result explanations ---------- */
   function explain(r, type) {
+    if (r.uncovered && !r.leave) return { cls: 'warn', t: '<b>ආවරණය නොකළ ප්‍රමාදයක්</b> (සහන ප්‍රමාද මාසයට 2 ක් පමණි). OT නැත.' };
+    if (r.uncovered && r.leave === 'half') return { cls: 'bad', t: '<b>ආවරණය නොකළ ප්‍රමාදය</b> – සහන 2 ට පසුව: වරුවක නිවාඩුවක් (දින ½) අඩු වේ. OT නැත.' };
+    if (r.uncovered && r.leave === 'short') return { cls: 'warn', t: '<b>ආවරණය නොකළ ප්‍රමාදය කෙටි නිවාඩුවක් ලෙස ගත්තා</b> (පැය 1½). OT නැත.' };
     switch (r.code) {
+      case 'W_BOTH_HALF': return { cls: 'warn', t: '<b>වරුවක නිවාඩුවක් (දින ½)</b><br>ප්‍රමාද වී පැමිණීම සහ කලින් පිටවීම (හෝ රාජකාරි මැදින් සේවය). OT නැත.' };
+      case 'W_BOTH_UNDER4': return { cls: 'bad', t: '<b>වරුවක නිවාඩුවක් (දින ½)</b> – ඒත් රාජකාරි මැදින් සේවය පැය 4 ට අඩුයි ⚠ පරීක්ෂා කරන්න. OT නැත.' };
       case 'W_OK':
         return { cls: 'ok', t: '<b>OT ' + dur(r.ot) + '</b><br>උදේ ' + dur(r.morning) + ' + හවස/රාත්‍රි ' + dur(r.evening) + (r.late ? '<br>ප්‍රමාද අඩු කිරීම: විනාඩි ' + r.lateChunk : '') };
       case 'W_BELOW_MIN': return { cls: 'warn', t: 'අවම කොන්දේසි සපුරා නැත (එක් පැත්තකට විනාඩි 30, දවසට පැය 1). OT නැත.' };
@@ -208,7 +213,7 @@
       '<div class="sep"></div><span><b>TOTAL</b></span><b>' + money(sm.otAmount + sm.allowAmount) + '</b></div>' +
       '<button class="btn alt block" style="margin-top:10px" data-a="viewsum">සාරාංශය බලන්න</button></div>';
     if (DB.settings.baseSalary && DB.settings.legacy && (!String(DB.settings.name || '').trim() || !String(DB.settings.designation || '').trim())) out += '<div class="banner" style="background:var(--warnbg,#fff4d6);color:var(--warn,#7a5200)"><span>ඔබේ නම සහ තනතුර SETTINGS → පුද්ගලික පිටුවේ ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ)</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
-    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
+    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</span><span class="row" style="gap:6px"><button class="btn sm" data-a="helpstart">උදව් – ආරම්භ කිරීම</button><button class="btn sm" data-a="gotoprofile">SETTINGS</button></span></div>';
     out += installCard();
     { const by = OT.builtinYears(window.LK_HOLIDAYS), now = new Date(), cy = now.getFullYear(), ex = DB.settings.holidayExtra || {};
       const has = (y) => by[y] || Object.keys(ex).some((d) => d.startsWith(y + '-'));
@@ -243,9 +248,10 @@
       if (r.kind === 'worked' && r.valid) {
         if (r.adjFail) mid += '<br><span class="chip bad">ගෙවන්නේ නැත – ආසන්න වැඩකරන දිනයේ සේවය නැත</span>';
         else if (r.adj === 'pending') mid += '<br><span class="chip warn">⚠ ආසන්න වැඩකරන දිනය තහවුරු කර නැත</span>';
-        if (r.leave === 'short') mid += '<br><span class="chip mu">කෙටි නිවාඩුව</span>';
+        if (r.uncovered && !r.leave) mid += '<br><span class="chip warn">සහන ප්‍රමාදය</span>';
+        if (r.leave === 'short') mid += '<br><span class="chip mu">' + (r.leaveSide === 'mid' ? 'කෙටි නිවාඩුව (රාජකාරි මැද)' : 'කෙටි නිවාඩුව') + '</span>';
         else if (r.leave === 'half') mid += '<br><span class="chip mu">වරුවක නිවාඩුව</span>';
-        const spTxt = { am: 'උදේ OT පමණයි', pm: 'හවස OT පමණයි', comp: 'හිලව් නිවාඩුවට', allot: 'සම්පූර්ණ පැය OT', skip: 'ගන්නේ නෑ', noot: 'OT ගන්නේ නෑ' }[r.special];
+        const spTxt = { mshort: 'මැද කෙටි නිවාඩුව', am: 'උදේ OT පමණයි', pm: 'හවස OT පමණයි', comp: 'හිලව් නිවාඩුවට', allot: 'සම්පූර්ණ පැය OT', skip: 'ගන්නේ නෑ', noot: 'OT ගන්නේ නෑ' }[r.special];
         if (spTxt) mid += '<br><span class="chip mu">★ ' + spTxt + '</span>';
       }
       if (r.kind === 'leave') mid = '<span class="chip mu">නිවාඩු</span>';
@@ -261,7 +267,10 @@
     let out = '<div class="card" id="mSum"><h2>' + monthLabel(view.month) + ' සාරාංශය</h2><div class="tot">' +
       '<span>සේවය කල දින ගණන</span><b>' + sm.workedDays + '</b>' +
       '<span>ලබා ගත් නිවාඩු / OFF</span><b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + ' / ' + sm.offDays + '</b>' +
-      (sm.shortLeaves || sm.halfDays ? lb('කෙටි නිවාඩු / වරුවක නිවාඩු', 'කෙටි නිවාඩු මාසයට ' + sm.shortLeaveCap + 'ක් හිමියි') + '<b>' + sm.shortLeaves + ' / ' + sm.halfDays + '</b>' : '') +
+      ((sm.shortLeaves || sm.halfDays || sm.lateUncovered) ? '<div class="sep"></div><span><b>නිවාඩු සාරාංශය</b></span><b></b>' +
+        lb('කෙටි නිවාඩු', 'මාසයට ' + sm.shortLeaveCap + 'ක් හිමියි' + (sm.midShort ? ' · රාජකාරි මැද ' + sm.midShort : '')) + '<b>' + sm.shortLeaves + ' / ' + sm.shortLeaveCap + '</b>' +
+        lb('ආවරණය නොකළ සහන ප්‍රමාද', 'මාසයට ' + sm.lateFreeCap + 'ක් හිමියි') + '<b>' + Math.min(sm.lateUncovered, sm.lateFreeCap) + ' / ' + sm.lateFreeCap + '</b>' +
+        lb('වරුවක නිවාඩු', sm.lateHalf ? 'ඉන් ' + sm.lateHalf + ' ක් සහන ප්‍රමාද 2 ට පසු ප්‍රමාද' : '') + '<b>' + sm.halfDays + '</b>' : '') +
       '<div class="sep"></div>' + lb('<b>OT + DAYS PAY</b>') + '<b style="font-size:20px">' + money(sm.otAmount + sm.allowAmount) + '</b></div></div>' +
       '<div class="card"><h2>OT</h2><div class="tot">' +
       '<span>අනුමත උපරිම පැය ගණන</span><b>' + (sm.capH != null ? sm.capH + ':00' : 'සීමාවක් නෑ') + '</b>' +
@@ -284,19 +293,19 @@
   }
 
   /* ---------- special days popup (before making vouchers) ---------- */
-  const SPN = { comp: 'හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා', allot: 'සම්පූර්ණ පැය ගණනම OT ලෙස', skip: 'මේ දවසේ OT / දීමනා ගන්නේ නෑ', noot: 'මේ දවසේ OT ගන්නේ නෑ', am: 'OT උදේ පමණයි', pm: 'OT හවස පමණයි' };
+  const SPN = { mshort: 'රාජකාරි මැද කෙටි නිවාඩුවක් (පැය 1½)', comp: 'හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා', allot: 'සම්පූර්ණ පැය ගණනම OT ලෙස', skip: 'මේ දවසේ OT / දීමනා ගන්නේ නෑ', noot: 'මේ දවසේ OT ගන්නේ නෑ', am: 'OT උදේ පමණයි', pm: 'OT හවස පමණයි' };
   function spRelevant(sm) { return sm.rows.some((r) => r.res.kind === 'worked' && r.res.valid && r.entry && (r.type !== 'weekday' || r.res.leave || r.res.adj === 'pending' || r.entry.special || r.entry.otTo || r.entry.lvOverride || (r.res.ot > 0 && (r.entry.overnight || (r.entry.out && OT.toMin(r.entry.out) > 18 * 60 && OT.cutoffFor(r.date, DB.settings) > 18 * 60))))); }
   function otToOpts(cur) { let o = '<option value="">අනුමත වේලාව දක්වා</option>'; for (let m = 16 * 60 + 30; m <= 22 * 60; m += 15) { const t = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); o += '<option value="' + t + '"' + (cur === t ? ' selected' : '') + '>' + t + '</option>'; } return o; }
   function spPopup(open) {
     const sm = SUM(); let p = document.getElementById('spop'); if (p) p.remove();
-    const days = sm.rows.filter((r) => r.res.kind === 'worked' && r.res.valid && r.entry && (r.type !== 'weekday' || r.res.ot > 0 || r.res.leave || r.entry.special || r.entry.otTo));
+    const days = sm.rows.filter((r) => r.res.kind === 'worked' && r.res.valid && r.entry && (view.spAll || r.type !== 'weekday' || r.res.ot > 0 || r.res.leave || r.res.uncovered || r.entry.special || r.entry.otTo));
     const marked = days.filter((r) => r.entry.special).length;
     if (marked) open = true;
     p = document.createElement('div'); p.id = 'spop';
     p.style.cssText = 'position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:14px';
     let o = '<div style="background:var(--card);color:var(--ink);border-radius:18px;padding:16px;width:100%;max-width:440px;max-height:92vh;overflow:auto"><b style="font-size:18px">' + monthLabel(view.month) + ' – විශේෂ දින තියෙනවද?</b>';
     if (!open) {
-      o += '<p class="mute">හිලව් නිවාඩුවක් සඳහා දින ඉතිරි කිරීම, දීමනාවක් වෙනුවට සම්පූර්ණ පැය OT ලෙස ගැනීම, OT උදේ/හවස පමණක් ගැනීම, OT අවසන් වේලාව වෙනස් කිරීම හෝ සමහර දවස් වල OT/දීමනා නොගැනීම මෙතනින් තෝරන්න.</p>' +
+      o += '<p class="mute">රාජකාරි මැද ගත් කෙටි නිවාඩු සලකුණු කිරීම, ආවරණය නොකළ ප්‍රමාද කෙටි නිවාඩු ලෙස ගැනීම, හිලව් නිවාඩුවක් සඳහා දින ඉතිරි කිරීම, දීමනාවක් වෙනුවට සම්පූර්ණ පැය OT ලෙස ගැනීම, OT උදේ/හවස පමණක් ගැනීම, OT අවසන් වේලාව වෙනස් කිරීම හෝ සමහර දවස් වල OT/දීමනා නොගැනීම මෙතනින් තෝරන්න.</p>' +
         '<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold" data-a="claimgo">නැහැ, ඉදිරියට</button><button class="btn alt" data-a="spopen">ඔව්, දින තෝරන්න</button><button class="btn alt" data-a="spclose">CANCEL</button></div></div>';
     } else {
       o += '<p class="mute" style="margin:6px 0">දවස් ටික් කරලා පහළින් විකල්පයක් තේරුවම ඒ සියල්ලටම යෙදෙනවා</p>';
@@ -304,10 +313,10 @@
         const sp = r.entry.special;
         o += '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="spck" value="' + r.date + '" style="width:22px;height:22px">' +
           '<span><b>' + dayNum(r.date) + '</b> ' + DAYS_S[wd(r.date)] + (r.type !== 'weekday' ? ' <span class="chip mu">විවේක</span>' : '') + ' <span class="mute">' + hm(r.entry.in) + '→' + hm(r.entry.out) + '</span>' +
-          (sp ? '<br><span class="chip warn">★ ' + SPN[sp] + '</span>' : '') + (r.res.leave ? '<br><select data-c="splv" data-d="' + r.date + '" style="margin-top:4px"><option value="">' + (r.res.leave === 'short' ? 'කෙටි නිවාඩුව' : 'වරුවක නිවාඩුව') + ' (ස්වයංක්‍රීය)</option><option value="short"' + (r.entry.lvOverride === 'short' ? ' selected' : '') + '>කෙටි නිවාඩුවක් ලෙස</option><option value="half"' + (r.entry.lvOverride === 'half' ? ' selected' : '') + '>වරුවක නිවාඩුවක් ලෙස</option></select>' : '') + (r.type === 'weekday' && !r.entry.overnight && r.res.kind === 'worked' ? '<br><select data-c="spot" data-d="' + r.date + '" style="margin-top:4px">' + otToOpts(r.entry.otTo || '') + '</select>' : '') + (r.res.adjFail ? '<br><span class="chip bad">ආසන්න වැඩ කරන දිනයේ සේවයකර නැත – ගෙවන්නේ නැත</span>' : '') + '</span></label>';
+          (sp ? '<br><span class="chip warn">★ ' + SPN[sp] + '</span>' : '') + (r.res.lateHalf ? '<br><span class="chip warn">ආවරණය නොකළ ප්‍රමාදය – කෙටි නිවාඩුවක් ලෙස ගන්නද?</span>' : '') + (r.res.leave ? '<br><select data-c="splv" data-d="' + r.date + '" style="margin-top:4px"><option value="">' + (r.res.leave === 'short' ? 'කෙටි නිවාඩුව' : 'වරුවක නිවාඩුව') + ' (ස්වයංක්‍රීය)</option><option value="short"' + (r.entry.lvOverride === 'short' ? ' selected' : '') + '>කෙටි නිවාඩුවක් ලෙස</option><option value="half"' + (r.entry.lvOverride === 'half' ? ' selected' : '') + '>වරුවක නිවාඩුවක් ලෙස</option></select>' : '') + (r.type === 'weekday' && !r.entry.overnight && r.res.kind === 'worked' ? '<br><select data-c="spot" data-d="' + r.date + '" style="margin-top:4px">' + otToOpts(r.entry.otTo || '') + '</select>' : '') + (r.res.adjFail ? '<br><span class="chip bad">ආසන්න වැඩ කරන දිනයේ සේවයකර නැත – ගෙවන්නේ නැත</span>' : '') + '</span></label>';
       });
-      o += '<div style="display:grid;gap:6px;margin-top:10px">' + ['comp', 'allot', 'am', 'pm', 'skip', 'noot'].map((k) => '<button class="btn alt sm" data-a="spset" data-v="' + k + '">' + SPN[k] + '</button>').join('') +
-        '<button class="btn alt sm" data-a="spset" data-v="">CLEAR (තෝරා ගැනීම ඉවත් කරන්න)</button></div>' +
+      o += '<div style="display:grid;gap:6px;margin-top:10px">' + ['comp', 'allot', 'am', 'pm', 'mshort', 'skip', 'noot'].map((k) => '<button class="btn alt sm" data-a="spset" data-v="' + k + '">' + SPN[k] + '</button>').join('') +
+        '<button class="btn alt sm" data-a="spset" data-v="">CLEAR (තෝරා ගැනීම ඉවත් කරන්න)</button>' + (view.spAll ? '' : '<button class="btn alt sm" data-a="spall">සියලු වැඩ කළ දවස් පෙන්වන්න</button>') + '</div>' +
         '<div class="mute" style="margin-top:6px">සටහන: "හිලව් නිවාඩුව" සහ "සම්පූර්ණ පැය OT" වලට අදාල වන්නේ විවේක දින (සෙනසුරාදා/ඉරිදා/PH) පමණි.</div>' +
         '<div class="row" style="gap:8px;margin-top:12px"><button class="btn gold" data-a="claimgo">ඉදිරියට – වවුචර් සකසන්න</button><button class="btn alt" data-a="spclose">CANCEL</button></div></div>';
     }
@@ -452,6 +461,7 @@
     const S = DB.settings, st = view.st || 'me';
     let h = '<div class="seg stabs">' + STABS.map(([k, n]) => '<button class="' + (k === st ? 'on' : '') + '" data-a="stab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
     if (st === 'me') {
+      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0 0 8px"><b>කලින් මේ ඇප් එක පාවිච්චි කළා නම්</b> සහ BACKUP එකක් තියෙනවා නම්, තොරතුරු අතින් ඇතුළත් කරනවාට වඩා එයින් RESTORE කරන්න.</p><button class="btn alt block" data-a="gotoapp">ඇප් පිටුවට යන්න (RESTORE) ➜</button></div>';
       h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + '<label class="f"><span>සේවා ස්ථානය</span><input type="text" value="' + esc(STATION) + '" readonly disabled></label>' + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
       h += '<div class="card"><h2>පොදු 35 අ වවුචරය</h2>' + fld('ගෙවීම් ශාඛාව', 'payUnit', 'text') +
         fld('විෂය සංකේතය (උදා: AA, AB)', 'subjectCode', 'text') +
@@ -499,17 +509,18 @@
     h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([
       lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.'),
       lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
-      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]));
+      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]) + '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>');
     h += sec(lg('2. දිනපතා සටහන් කිරීම', '2. Daily entries'), li([
       lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" ඔබන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
       lg('එක් වේලාවක් පමණක් ඇතුළත් කර SAVE කරන්නත්, අනෙක් වේලාව පසුව ඇතුලත් කරන්නත් පුළුවන් (අසම්පූර්ණ දින ලකුණු වේ).', 'You may save only one time and add the other later (such days are marked incomplete).'),
-      lg('පෙර දිනයක් සඳහා "වෙනත් දිනයක් තෝරන්න" හෝ "මාසය" පිටුවෙන් දිනය CLICK කර වේලාවන් ඇතුළත් කරන්න. සේවයට නොපැමිණි දිනයක් නම් "නිවාඩු" හෝ "OFF DAY" ලෙස සලකුණු කරන්න.', 'For an earlier date tap "Pick another date" or open the Month tab and tap the day. Mark leave days as "Leave".'),
+      lg('පෙර දිනයක් සඳහා "වෙනත් දිනයක් තෝරන්න" හෝ "මාසය" පිටුවෙන් දිනය CLICK කර වේලාවන් ඇතුළත් කරන්න. සේවයට නොපැමිණි දිනයක සාමාන්‍ය දවසක නම් "නිවාඩු" හෝ විවේක දිනයක නම් "OFF DAY" ලෙස සලකුණු කරන්න.', 'For an earlier date tap "Pick another date" or open the Month tab and tap the day. Mark leave days as "Leave".'),
       lg('රාත්‍රිය පුරා සේවය නම් "රාත්‍රිය පුරා සේවය" ඔන් කර, පිටවීම ඊළඟ දවසේ වේලාව ඇතුළත් කරන්න.', 'For overnight duty switch on "Overnight duty" and enter the departure time of the next day.')]));
     h += sec(lg('3. ගණනය කරන නීති (සාරාංශය)', '3. Calculation rules (summary)'), li([
       lg('සතියේ දින රාජකාරිය 08:30–16:15. උදේ OT 07:00 සිට. මිනිත්තු 15 කොටස් වලට පහළට වටයයි.', 'Weekday duty is 08:30–16:15. Morning OT counts from 07:00. Time is rounded down to 15-minute blocks.'),
-      lg('ප්‍රමාද: විනාඩි 15 ක් දක්වා නම් හවස OT වලින් විනාඩි 15 ක්, විනාඩි 16–30 නම් විනාඩි 30 ක් අඩු වේ. 09:01 න් පසු පැමිණියොත් 18.00 දක්වා සේවය කරන දිනකදී නම් OT නැත. විශේෂ කාල සීමාවකදී නම් ප්‍රමාද වූ කාලය (කෙටි නිවාඩුව හෝ වරුවක නිවාඩුව) OT වලින් අඩු කර ඉතිරි කාලයට ගෙවීම් සැකසේ.', 'Late arrival: up to 15 min deducts 15 min of evening OT, 16–30 min deducts 30 min. Arrival after 09:00 earns no OT.'),
+      lg('ප්‍රමාද: 08:31 – 09:00 අතර පැමිණියහොත් ප්‍රමාදය (මිනිත්තු 15 ක් දක්වා නම් 15, 16–30 නම් 30) හවසින් 16:45 දක්වා ආවරණය කළ යුතුය. ආවරණය කළ දවසක ප්‍රමාදයක් හෝ OT නැත. 16:45 න් පසු සේවය කළ කාලය OT වේ (ප්‍රමාද වූ කාලය අඩු කර).', 'Late arrival: up to 15 min deducts 15 min of evening OT, 16–30 min deducts 30 min. Arrival after 09:00 earns no OT.'),
+      lg('ආවරණය නොකර 16:15 ට පිටවීමේ අවස්ථා දෙකක් මාසයකට හිමිය (OT නැත). 3 වැනි ප්‍රමාදයේ සිට ආවරණය නොකළ සෑම ප්‍රමාදයකටම වරුවක (දින ½) නිවාඩුවක් සලකුණු වේ. ඉතිරි කෙටි නිවාඩුවක් තිබේ නම් ඒ ප්‍රමාදය කෙටි නිවාඩුවක් ලෙස ගත හැක (වවුචරය සකසන විට අසයි).', 'Two uncovered late arrivals a month are allowed; from the 3rd each counts as a half-day leave (or a short leave if one is left).'),
       lg('එක් පැත්තකට අවම විනාඩි 30, දවසට අවම පැය 1.', 'Each side needs at least 30 min and the day at least 1 hour. If one side is 1 hour or more and the other is under 30 min, only the larger side is paid.'),
-      lg('සති අන්ත / ර.ප්‍ර. නිවාඩු දිනවල සාමාන්‍ය රාජකාරි වේලාව සඳහා දෛනික දීමනාවක් ලැබේ (වැටුප ÷30 ). ඊට අමතර කාලය OT වේ.', 'Normal hours on weekends and public holidays earn a daily allowance (salary ÷30 or ÷20). Extra hours are OT.'),
+      lg('සති අන්ත / ර.ප්‍ර. නිවාඩු දිනවල සාමාන්‍ය රාජකාරි වේලාව සඳහා දෛනික දීමනාවක් ලැබේ (වැටුප ÷30 ). ඊට අමතර කාලය OT වේ. අවශ්‍ය නම් (වවුචරය සකසන විට) සම්පූර්ණ පැය ගණනම OT ලෙස ගත හැක.', 'Normal hours on weekends and public holidays earn a daily allowance (salary ÷30 or ÷20). Extra hours are OT.'),
       lg('OT ගෙවන්නේ අවසාන වේලාව (සාමාන්‍යයෙන් 18:00, 2026 නොවැම්බර්–දෙසැම්බර් 22:00) දක්වා පමණි. SETTINGS → සීමා වලින් වෙනස් කළ හැක.', 'OT is paid only until the cut-off time (default 18:00; 22:00 for Nov–Dec 2026). Change it in Settings → Limits.'),
       lg('රාත්‍රි සේවය: 16:15 සිට පසුදින 08.30 දක්වා සියල්ල OT. මාසයේ අන්තිම දවසේ නම් රාත්‍රී 12.00 දක්වා ඒ මාසයටත්, 12.00 න් පසු අලුත් මාසයටත් ගණනය වේ.', 'Overnight duty: everything from 16:15 until the next duty start is OT. If it starts on the last day of a month, time until midnight counts to that month and time after midnight counts to the next month.')]));
     h += sec(lg('4. මාසික සීමා', '4. Monthly limits'), li([
@@ -518,7 +529,7 @@
     h += sec(lg('5. ඉල්ලීම් සහ වවුචර්', '5. Claims and vouchers'), li([
       lg('මාසය අවසන් වූ විට "මාසය" පිටුවෙන් "වවුචර් සකසන්න" CLICK කරන්න. ඉන්පසු "වවුචර්" පිටුවෙන් වවුචර් විවෘත කරන්න.', 'At month end tap "Save claim" on the Home or Month tab, then open the vouchers from the Claims tab.'),
       lg('පොදු 35 අ = අතිකාල දීමනා වවුචරය, පොදු 35 = සති අන්ත / නිවාඩු දින දීමනා වවුචරය. දෙකම හිස් A4 කඩදාසියක ෆෝරමයත් සමඟ සම්පූර්ණයෙන් මුද්‍රණය වේ.', 'Gen 35a is the overtime voucher, Gen 35 is the weekend / holiday allowance voucher. Both print the complete form on a blank A4 sheet.'),
-      lg('මුද්‍රණය: "මුද්‍රණය / PDF" ඔබා Chrome මුද්‍රණ කවුළුවේ කඩදාසි ප්‍රමාණය A4, Margins = None, Scale = 100%, "Background graphics" ඔන් කර Print කරන්න (PDF ලෙස සුරැකීමටද මෙයම).', 'To print tap "Print / PDF", then in the Chrome print dialog choose paper size A4, Margins = None, Scale = 100% and tick "Background graphics". Choose "Save as PDF" to make a PDF.'),
+      lg('වවුචරය විවෘත කර "📄 PDF SAVE කරන්න (A4)" ඔබන්න. වවුචරය A4 PDF එකක් ලෙස ෆෝන් එකේ Downloads වලට සුරැකේ. ඒ ගොනුව print කරන්න (Scale 100%, "Fit to page" නොවේ). ෆෝන් එකට printer එකක් සම්බන්ධ කර ඇත්නම් "PRINT" ඔබා A4, Margins = None, Scale = 100%, "Background graphics" ඔන් කර Print කරන්න.', 'To print tap "Print / PDF", then in the Chrome print dialog choose paper size A4, Margins = None, Scale = 100% and tick "Background graphics". Choose "Save as PDF" to make a PDF.'),
       lg('35 අ වගුවේ දිනයට මුලින් SA (සෙනසුරාදා), SU (ඉරිදා), PH (රජයේ නිවාඩු) ලකුණු කෙරේ. පේළි 31 ක් දක්වා එක පිටුවේ ඇතුළත් වේ, ඊට වැඩි නම් දෙවන පිටුවක් එකතු වේ.', 'In the Gen 35a table dates are prefixed SA (Saturday), SU (Sunday) or PH (public holiday). Up to 31 rows fit on one page; more rows continue on a second page.')]));
     h += sec(lg('6. නිවාඩු දින', '6. Holidays'), li([
       lg('2026 සහ 2027 රජයේ ප්‍රසිද්ධ නිවාඩු දින ඇතුළත්ය. ඉන් පසු වසර වල සිංහල අවුරුදු (අප්‍රේල් 13, 14), මැයි 1, නත්තල, පෙබරවාරි 4 ස්වයංක්‍රීයව ඇතුළත් වේ; පොහොය දින ඇතුළු අනෙක් දින එක් කළ යුතුය. අමතර නිවාඩුවක් ප්‍රකාශයට පත් වුවහොත් සැකසුම් → නිවාඩු වලින් එක් කරන්න, අනවශ්‍ය දිනයක් ඉවත් කරන්න. නැතිනම් ඇප් එකේ අලුත් අනුවාදයක් ලැබෙන තෙක් බලන්න.', 'Public holidays for 2026 and 2027 are built in. After that only fixed-date holidays (Apr 13/14, May 1, Feb 4, Dec 25) are added automatically; add Poya days and others yourself. If the government announces an extra holiday, add it in Settings → Holidays; you can also remove a day.')]));
@@ -527,8 +538,9 @@
       lg('ඇප් එකේ අලුත් අනුවාදයක් එකතු කලොත් දැනට තිබෙන දත්ත වෙනසක් නොවී පවතී. දත්ත හිස් උනොත් ආසන්නතම BACKUP FILE එකකින් RESTORE කරගන්න.', 'Upload new versions of the app to the same site (the Deploys page on Netlify). A new site shows empty data; if that happens restore your backup file.')]));
     h += sec(lg('8. විශේෂ දින (හිලව් නිවාඩු, OT/දීමනා නොගැනීම)', '8. Special days'), li([
       lg('මාසය අවසානයේ "මාසය" පිටුවෙන් "වවුචර් සකසන්න" ඔබන විට, විශේෂ තීරණයක් ගැනීමට අවශ්‍ය දවසක් (සති අන්ත / නිවාඩු දිනයක වැඩ කිරීම, නිවාඩුවක් සමඟ OT තිබීම, OT 18:00 ට පසුවත් ගන්නා දවසක් වැනි) තිබේ නම් පමණක් "විශේෂ දින" කවුළුවක් එයි. නැතිනම් කෙලින්ම වවුචරයට යයි.', 'A special-days window appears only when needed.'),
+      lg('වවුචරය සකසද්දී විශේෂ දින කවුළුවේ මේවාත් අසයි: (අ) රාජකාරි මැදදී ගත් කෙටි නිවාඩු ඇත්නම් ඒ දවස් සලකුණු කිරීම; (ආ) ආවරණය නොකළ ප්‍රමාද තිබී කෙටි නිවාඩු ඉතිරිව ඇත්නම්, ඒවා කෙටි නිවාඩු ලෙස ගන්නද යන්න.', 'The special-days window also asks about mid-day short leaves and uncovered lates.'),
       lg('දවස් ටික් කර පහළින් විකල්පයක් තෝරන්න. එය ටික් කළ සියලු දවස් වලට එකවර යෙදේ:', 'Tick days, then choose an option.'),
-      lg('<b>හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා</b> – විවේක දිනයක වැඩ කළ දවස දීමනාවක් වෙනුවට හිලව් නිවාඩුවකට ඉතිරි කරයි (දීමනා/OT ගෙවන්නේ නැත).', 'Save for compensatory leave.'),
+      lg('<b>හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා</b> – විවේක දිනයක සාමාන්‍ය රාජකාරි වේලාවේ වැඩ කළ දවස දීමනාවක් වෙනුවට හිලව් නිවාඩුවකට ඉතිරි කරයි (දීමනාව ගෙවන්නේ නැත). සාමාන්‍ය රාජකාරි වේලාවට අමතර වැඩ කළ කාලයට OT ගෙවයි.', 'Save for compensatory leave.'),
       lg('<b>සම්පූර්ණ පැය ගණනම OT ලෙස</b> – දීමනාවක් වෙනුවට වැඩ කළ සියලු පැය OT ලෙස ගණනය කරයි.', 'Count all hours as OT.'),
       lg('<b>OT උදේ / හවස පමණයි</b> – සතියේ දවසක උදේ OT පමණක් හෝ හවස OT පමණක් ගනී.', 'Morning-only or evening-only OT.'),
       lg('<b>මේ දවසේ OT / දීමනා ගන්නේ නෑ</b> – ඒ දවස ගෙවීමෙන් බැහැර කරයි.', 'Skip the day.'),
@@ -536,20 +548,21 @@
       lg('"CLEAR" මඟින් තෝරා ගැනීම ඉවත් කළ හැක.', 'CLEAR removes the choice.')
     ])); 
     h += sec(lg('9. කෙටි නිවාඩු සහ වරුවක නිවාඩු', '9. Short leave and half-day leave'), li([
-      lg('සතියේ දවසක ප්‍රමාද වී පැමිණියහොත් හෝ කලින් පිටවුණහොත්, ඒ කාලය නිවාඩුවක් ලෙස සලකා ඒ දවසේ OT වලින් අඩු කරයි. මෙය ප්‍රායෝගිකව බලපාන්නේ රාත්‍රි සේවය හෝ 18:00 ට පසුවත් OT ගන්නා විශේෂ කාල සීමා වලදීයි.', 'Late arrival or early departure on weekdays is treated as leave.'),
-      lg('<b>කෙටි නිවාඩුව</b> – පැය 1½ ක් අඩු වේ. පැමිණීම 09:01–10:00 අතර, හෝ පිටවීම 14:45–16:14 අතර.', 'Short leave deducts 1½ hours.'),
-      lg('<b>වරුවක නිවාඩුව</b> – පැය 3½ ක් අඩු වේ. පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. 12:30 න් පසු පැමිණියහොත් හෝ 12:00 ට පෙර පිටවුණහොත් ඒ දවසේ OT නැත.', 'Half-day leave deducts 3½ hours.'),
-      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ප්‍රමාදවීම් 03ක් එකතු කර වරුවක නිවාඩු ලෙස ගණන් ගැනේ.', 'Two short leaves per month.'),
+      lg('දවසේ නියමිත රාජකාරි කාලය සම්පූර්ණ කළ යුතුය. ප්‍රමාදයක් හෝ කෙටි / වරුවක නිවාඩුවක් නිසා අඩු වූ කාලය ඒ දවසේ කළ මුළු OT කාලයෙන් (උදේ + හවස + රාත්‍රි) අඩු කර, ඉතිරි කාලයට පමණක් ගෙවයි. ඉතිරි කාලයටත් අවම නීති (එක් පැත්තකට විනාඩි 30, දවසට පැය 1, විනාඩි 15 කොටස්) යෙදේ. උදා: OT පැය 2¼ න් කෙටි නිවාඩුවක් (1½) අඩු කළ විට ඉතිරි විනාඩි 45 යි; එය පැය 1 ට අඩු නිසා ගෙවන්නේ නැත. ඒ නිසා මෙය ප්‍රායෝගිකව බලපාන්නේ රාත්‍රි සේවය හෝ 18:00 ට පසුවත් OT ගන්නා විශේෂ කාල සීමා වලදීයි.', 'Late arrival or early departure on weekdays is treated as leave.'),
+      lg('<b>කෙටි නිවාඩුව</b> – එක දිගට පැය 1½ යි; කොටස් කර ගත නොහැක. පැමිණීම 09:01–10:00 අතර, පිටවීම 14:45–16:14 අතර, හෝ රාජකාරි අතරමැද ගත හැක. අතරමැද ගත් එක වවුචරය සකසද්දී විශේෂ දින කවුළුවේ සලකුණු කරන්න.', 'Short leave deducts 1½ hours.'),
+      lg('<b>වරුවක නිවාඩුව</b> – දින ½ යි, පැය 3½ අඩු වේ. උදේ හෝ හවස රාජකාරි වේලාව ඇතුළත අවම පැය 3½ ක් සේවය කර ගත හැක: පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. නැතිනම් දෙකෙළවරින් පිටත, රාජකාරි මැදින් අවම පැය 4 ක් සේවය කර උදේ / හවස අඩු කොටස් වරුවක නිවාඩුවක් ලෙස ගත හැක (OT නැත). එක දවසක ප්‍රමාදයත් කලින් පිටවීමත් (කොටස් දෙකක්) තිබුණොත් එය වරුවක නිවාඩුවකි.', 'Half-day leave deducts 3½ hours.'),
+      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ඒවා වරුවක නිවාඩු ලෙස ගණන් වේ. ආවරණය නොකළ සහන ප්‍රමාද 2 ක් ඊට වෙනම ය.', 'Two short leaves per month.'),
+      lg('"මාසය" පිටුවේ පහළ "නිවාඩු සාරාංශය" කොටසෙන් ඒ මාසයේ කෙටි නිවාඩු (X/2), නොමිලේ ප්‍රමාද (Y/2), වරුවක නිවාඩු සහ මුළු අඩු වූ නිවාඩු දින බලාගන්න.', 'Use the Leave summary at the bottom of the Month page to check the month\'s leave.'),
       lg('"මාසය" පිටුවේ දිනය යටතේ "කෙටි නිවාඩුව" / "වරුවක නිවාඩුව" ලෙස පෙන්වයි. ඒවා වෙනස් කිරීමට විශේෂ දින කවුළුවේ ඒ දවසේ පේළියෙන් තෝරන්න.', 'Shown as chips in the month list.'),
-      lg('නිවාඩු ගණනය කරන විට වරු නිවාඩු දෙකක් එක් දිනක් ලෙස සලකයි (උදා: සම්පූර්ණ දින 2 ක් සහ වරු 2 ක් = දින 3 ක්). කෙටි නිවාඩු ඊට ඇතුළත් නොවේ.', 'Two half-days count as one day.')
+      
     ])); 
     h += sec(lg('10. සති අන්ත / නිවාඩු දිනවල වැඩ කිරීම', '10. Working on weekends and holidays'), li([
-      lg('සති අන්ත හෝ රජයේ නිවාඩු දිනයක දීමනාව සහ OT ගෙවීමට, ඊට ආසන්න සතියේ දවසක (නිවාඩු දින පෙළට කලින් හෝ පසු) සේවය කර තිබිය යුතුය. උදා: සිකුරාදා 12:30 ට පෙර සිට 16:15 දක්වා, හෝ සඳුදා 09:00 ට පෙර සිට 12:00 දක්වා. එක් පැත්තක් සම්පූර්ණ කළත් ප්‍රමාණවත්.', 'Weekend/holiday pay needs an adjacent weekday to be worked.'),
+      lg('සති අන්ත හෝ රජයේ නිවාඩු දිනයක දීමනාව සහ OT ගෙවීමට, ඊට ආසන්නම සතියේ දිනයක (නිවාඩු දින පෙළට කලින් හෝ පසු) සේවය කර තිබිය යුතුය. උදා: සිකුරාදා 12:30 ට පෙර සිට 16:15 දක්වා, හෝ සඳුදා 09:00 ට පෙර සිට 12:00 දක්වා. එක් පැත්තක් සම්පූර්ණ කළත් ප්‍රමාණවත්.', 'Weekend/holiday pay needs an adjacent weekday to be worked.'),
       lg('ආසන්න දවස නිවාඩුවක් හෝ හිලව් නිවාඩුවක් නම් එය සේවය කළ දවසක් ලෙස ගණන් නොවේ.', 'A leave day does not count.'),
       lg('ආසන්න දවසේ වේලාවන් තවම ඇතුළත් කර නැත්නම් ⚠ සලකුණක් පෙන්වයි. ඒවා ඇතුළත් කළාම ස්වයංක්‍රීයව තහවුරු වේ.', 'A warning shows if the adjacent day has no entry yet.')
     ])); 
     h += sec(lg('11. වවුචරයේ මුදල අකුරින් පරීක්ෂා කිරීම', '11. Checking the amount in words'), li([
-      lg('වවුචරය විවෘත කළ පසු "🔍 මුදල ඉලක්කමෙන් තිබෙන ආකාරය පරීක්ෂා කරන්න" ඔබන්න. මුදල අකුරින් ලියා ඇති ආකාරය පෙනෙයි.', 'Tap the check button on the voucher.'),
+      lg('වවුචරය විවෘත කළ පසු "🔍 මුදල අකුරෙන් තිබෙන ආකාරය පරීක්ෂා කරන්න" ඔබන්න. මුදල අකුරින් ලියා ඇති ආකාරය පෙනෙයි.', 'Tap the check button on the voucher.'),
       lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා වචන ඔබටම හදා සුරකින්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
     ])); 
     h += sec(lg('12. Google Lens භාවිතය', '12. Using Google Lens'), li([
@@ -559,7 +572,7 @@
     ])); 
     h += sec(lg('SAVE SETTINGS', '13. Saving settings'), li([
       lg('SETTINGS පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
-      lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යන්න බැහැ; අනතුරු ඇඟවීමක් එයි. "SETTINGS → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
+      lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යාමට නොහැක; අනතුරු ඇඟවීමක් එයි. "SETTINGS → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
     ])); 
     return h;
   }
@@ -1074,6 +1087,7 @@
     about() { const b = document.getElementById('aboutBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     unlock() { if (grpOf(view.st || 'me') === 'x') DB.settings.lockedX = false; else DB.settings.locked = false; view.dirty = true; save(); render(); },
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
+    helpstart() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'Google Lens'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
@@ -1081,6 +1095,7 @@
     next() { shiftMonth(1); render(); },
     edit(el) { if (needProfile()) return; openEditor(el.dataset.d); },
     gotoprofile() { goProfile(); },
+    gotoapp() { if (guardLeave()) return; view.tab = 'settings'; view.st = 'app'; render(); window.scrollTo(0, 0); },
     closeSheet,
     togcal() { view.showCal = !view.showCal; render(); },
     gotoday() { view.month = todayStr().slice(0, 7); render(); },
@@ -1129,7 +1144,7 @@
       checkCapAlert(draftDate.slice(0, 7));
     },
     cleardraft() { delete DB.entries[draftDate]; save(); closeSheet(); render(); },
-    claim() { if (requireFields(['name', 'designation', 'baseSalary', 'salaryNo', 'workDesc', 'payUnit'], false)) return; if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
+    claim() { view.spAll = false; if (requireFields(['name', 'designation', 'baseSalary', 'salaryNo', 'workDesc', 'payUnit'], false)) return; if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
     spmanual() { spPopup(true); },
     claimgo() {
       const p = document.getElementById('spop'); if (p) p.remove();
@@ -1148,6 +1163,7 @@
     },
     spopen() { spPopup(true); },
     spclose() { const p = document.getElementById('spop'); if (p) p.remove(); },
+    spall() { view.spAll = true; spPopup(true); },
     spset(el) {
       const v = el.dataset.v, ds = Array.from(document.querySelectorAll('#spop .spck:checked')).map((x) => x.value);
       if (!ds.length) return toast('දවස් ටික් කරන්න', true);
@@ -1156,7 +1172,7 @@
       ds.forEach((d) => {
         const e = DB.entries[d]; if (!e) return;
         if ((v === 'comp' || v === 'allot') && typ(d) === 'weekday') { skipped++; return; }
-        if ((v === 'am' || v === 'pm') && typ(d) !== 'weekday') { skipped++; return; }
+        if ((v === 'am' || v === 'pm' || v === 'mshort') && typ(d) !== 'weekday') { skipped++; return; }
         if (v) e.special = v; else delete e.special;
       });
       save(); render(); spPopup(true);
