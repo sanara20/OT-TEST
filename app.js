@@ -213,7 +213,7 @@
       '<div class="sep"></div><span><b>TOTAL</b></span><b>' + money(sm.otAmount + sm.allowAmount) + '</b></div>' +
       '<button class="btn alt block" style="margin-top:10px" data-a="viewsum">සාරාංශය බලන්න</button></div>';
     if (DB.settings.baseSalary && DB.settings.legacy && (!String(DB.settings.name || '').trim() || !String(DB.settings.designation || '').trim())) out += '<div class="banner" style="background:var(--warnbg,#fff4d6);color:var(--warn,#7a5200)"><span>ඔබේ නම සහ තනතුර SETTINGS → පුද්ගලික පිටුවේ ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ)</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
-    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad)"><span>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</span><span class="row" style="gap:6px"><button class="btn sm" data-a="helpstart">උදව් – ආරම්භ කිරීම</button><button class="btn sm" data-a="gotoprofile">SETTINGS</button></span></div>';
+    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad);flex-direction:column;align-items:stretch;gap:8px"><b>ඔබ මේ ඇප් එක ඉස්සර පාවිච්චි කළ කෙනෙක්ද?</b><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm gold" data-a="helpstart">අලුත් කෙනෙක් ➜</button><button class="btn sm alt" data-a="gotoprofile">කලින් පාවිච්චි කළා ➜</button></div></div>';
     out += installCard();
     { const by = OT.builtinYears(window.LK_HOLIDAYS), now = new Date(), cy = now.getFullYear(), ex = DB.settings.holidayExtra || {};
       const has = (y) => by[y] || Object.keys(ex).some((d) => d.startsWith(y + '-'));
@@ -267,7 +267,7 @@
     let out = '<div class="card" id="mSum"><h2>' + monthLabel(view.month) + ' සාරාංශය</h2><div class="tot">' +
       '<span>සේවය කල දින ගණන</span><b>' + sm.workedDays + '</b>' +
       '<span>ලබා ගත් නිවාඩු / OFF</span><b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + ' / ' + sm.offDays + '</b>' +
-      ((sm.shortLeaves || sm.halfDays || sm.lateUncovered) ? '<div class="sep"></div><span><b>නිවාඩු සාරාංශය</b></span><b></b>' +
+      (true ? '<div class="sep"></div><span><b>නිවාඩු සාරාංශය</b></span><b></b>' +
         lb('කෙටි නිවාඩු', 'මාසයට ' + sm.shortLeaveCap + 'ක් හිමියි' + (sm.midShort ? ' · රාජකාරි මැද ' + sm.midShort : '')) + '<b>' + sm.shortLeaves + ' / ' + sm.shortLeaveCap + '</b>' +
         lb('ආවරණය නොකළ සහන ප්‍රමාද', 'මාසයට ' + sm.lateFreeCap + 'ක් හිමියි') + '<b>' + Math.min(sm.lateUncovered, sm.lateFreeCap) + ' / ' + sm.lateFreeCap + '</b>' +
         lb('වරුවක නිවාඩු', sm.lateHalf ? 'ඉන් ' + sm.lateHalf + ' ක් සහන ප්‍රමාද 2 ට පසු ප්‍රමාද' : '') + '<b>' + sm.halfDays + '</b>' : '') +
@@ -461,7 +461,7 @@
     const S = DB.settings, st = view.st || 'me';
     let h = '<div class="seg stabs">' + STABS.map(([k, n]) => '<button class="' + (k === st ? 'on' : '') + '" data-a="stab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
     if (st === 'me') {
-      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0 0 8px"><b>කලින් මේ ඇප් එක පාවිච්චි කළා නම්</b> සහ BACKUP එකක් තියෙනවා නම්, තොරතුරු අතින් ඇතුළත් කරනවාට වඩා එයින් RESTORE කරන්න.</p><button class="btn alt block" data-a="gotoapp">ඇප් පිටුවට යන්න (RESTORE) ➜</button></div>';
+      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0 0 8px"><b>කලින් මේ ඇප් එක පාවිච්චි කර BACKUP එකක් තියෙනවා නම් එයින් RESTORE කරන්න.</b></p><button class="btn gold block" data-a="gotoapp">ඇප් පිටුවට යන්න - RESTORE ➜</button></div>';
       h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + '<label class="f"><span>සේවා ස්ථානය</span><input type="text" value="' + esc(STATION) + '" readonly disabled></label>' + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
       h += '<div class="card"><h2>පොදු 35 අ වවුචරය</h2>' + fld('ගෙවීම් ශාඛාව', 'payUnit', 'text') +
         fld('විෂය සංකේතය (උදා: AA, AB)', 'subjectCode', 'text') +
@@ -509,7 +509,7 @@
     h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([
       lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.'),
       lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
-      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]) + '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>');
+      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]) + (Number(DB.settings.baseSalary) ? '' : '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>'));
     h += sec(lg('2. දිනපතා සටහන් කිරීම', '2. Daily entries'), li([
       lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" ඔබන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
       lg('එක් වේලාවක් පමණක් ඇතුළත් කර SAVE කරන්නත්, අනෙක් වේලාව පසුව ඇතුලත් කරන්නත් පුළුවන් (අසම්පූර්ණ දින ලකුණු වේ).', 'You may save only one time and add the other later (such days are marked incomplete).'),
@@ -781,6 +781,9 @@
     let w = parts.join(' ');
     return noYi ? w : w + 'යි';
   }
+  /* plain form (…සිය → …සියය) and 'ක්' form (එකක්, පනහක්, පන්සියයක්, ලක්ෂයක්, මිලියනයක්) */
+  function siPlain(n) { const w = siWords(n, true); return /සිය$/.test(w) ? w + 'ය' : w; }
+  function siAk(n) { const w = siWords(n, true); if (/සිය$/.test(w)) return w + 'යක්'; if (/(ලක්ෂ|මිලියන)$/.test(w)) return w + 'යක්'; return w + 'ක්'; }
   const EDA = (css) => { const m = css && /--ed:([a-z0-9]+)/.exec(css); return m ? ' data-w="' + m[1] + '"' : ''; };
   /* saved edits of the amount-in-words text: DB.wordsOv[kind|month] = { amt, v:{key:text} } */
   const wOv = (kind, mk, key, amt, auto) => { const o = (DB.wordsOv || {})[kind + '|' + mk]; return o && o.amt === amt && o.v && o.v[key] != null ? o.v[key] : auto; };
@@ -823,7 +826,7 @@
     f += R(386, 456, 448, rsTxt) + R(462, 488, 448, ctsTxt);
     f += R(386, 456, 497, rsTxt, 'font-weight:700') + R(462, 488, 497, ctsTxt, 'font-weight:700');
     if (LANG() === 'en') f += A(140, 641, wOv('al', mk, 'ew1', amount, numWords(rs)), 'font-size:9pt;--ed:ew1') + A(202, 669, wOv('al', mk, 'ew2', amount, cts ? numWords(cts) : 'Nil'), 'font-size:9pt;--ed:ew2');
-    else f += A(372, 526, wOv('al', mk, 'sw1', amount, siWords(rs, true)), 'font-size:9pt;--ed:sw1') + A(92, 553, wOv('al', mk, 'sw2', amount, cts ? siWords(cts, true) : '—'), 'font-size:9pt;--ed:sw2');
+    else f += A(372, 526, wOv('al', mk, 'sw1', amount, siPlain(rs)), 'font-size:9pt;--ed:sw1') + A(92, 553, wOv('al', mk, 'sw2', amount, cts ? siAk(cts) : '—— ක්'), 'font-size:9pt;--ed:sw2');
     f += '</div>';
     /* back page: table of eligible days, placed in the blank area at the top */
     const rows = (s.allowRows || []).slice(0, 32).map((r, i) => {
@@ -957,7 +960,7 @@
       f += C(166.7, 218.9, mapBot(717.5), fmtHrs(last ? s.otMin : sub), 'font-weight:700');
       if (!last) f += Ab(222, 717.5, lg('(ඉදිරියට – ඊළඟ පිටුව බලන්න)', '(continued – see next page)'), 'font-size:8pt');
       else {
-        const words = LANG() === 'en' ? 'Rupees ' + numWords(rs) + (cts ? ' and cents ' + numWords(cts) : '') + ' only' : 'රුපියල් ' + siWords(rs) + (cts ? ' ශත ' + siWords(cts) : '');
+        const words = LANG() === 'en' ? 'Rupees ' + numWords(rs) + (cts ? ' and cents ' + numWords(cts) : '') + ' only' : 'රුපියල් ' + (cts ? siPlain(rs) + ' කුත් ශත ' + siAk(cts) : siAk(rs)) + ' පමණයි';
         f += Ab(232, 740, wOv('ot', mk, 'aw', amount, words + '  (' + lg('රු. ', 'Rs. ') + fmt2(amount) + ')'), 'font-size:8.6pt;width:318pt;white-space:nowrap;overflow:hidden;--ed:aw');
         f += Ab(439, 780, dateTxt);
       }
@@ -1043,7 +1046,7 @@
     const c = snapshotFor(mk, live);
     $('#voucher').innerHTML = '<div class="tb"><button class="btn gold sm" data-a="pdf">' + lg('📄 PDF SAVE කරන්න (A4)', '📄 Save PDF (A4)') + '</button><button class="btn alt sm" style="color:#fff;border-color:#fff" data-a="print">' + lg('PRINT', '🖨 Print') + '</button>' +
             '<button class="btn alt sm" style="color:#fff;border-color:#fff" data-a="closeVoucher">CLOSE</button></div>' +
-      '<div class="edhint"><button class="btn sm" data-a="chkwords">🔍 ' + lg('මුදල ඉලක්කමෙන් තිබෙන ආකාරය පරීක්‍ෂා කරන්න', 'Check how the amount is written') + '</button></div>' +
+      '<div class="edhint"><button class="btn sm" data-a="chkwords">🔍 ' + lg('මුදල අකුරින් තිබෙන ආකාරය පරීක්‍ෂා කරන්න', 'Check how the amount is written') + '</button></div>' +
       (kind === 'ot' ? g35aVoucher(c, mk) : g35Voucher(c, mk));
     $('#voucher').classList.add('on');
     $('#voucher').classList.remove('nobg');
