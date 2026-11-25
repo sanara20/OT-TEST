@@ -341,6 +341,7 @@
     const allowRows = [];
     let otMin = 0, allowDays = 0, leaveDays = 0, offDays = 0, workedDays = 0;
     const contDates = {};
+    let pendDays = 0, pendOt = 0, pendAllow = 0;
     let slUsed = 0, slTotal = 0, halfDays = 0, lateCnt = 0, lateHalf = 0, midShort = 0;
     // an overnight entry on the last day of the previous month may continue into day 1
     const prev = addDays(monthKey + '-01', -1);
@@ -372,6 +373,11 @@
           const aj = adjacency(ds, entries, S, holidays);
           res.adj = aj.state;
           if (aj.state === 'fail') Object.assign(res, { ot: 0, morning: 0, evening: 0, night: 0, post: 0, allowance: false, allowNext: false, adjFail: true });
+          else if (aj.state === 'pending' && !(entry && entry.adjInclude)) {
+            /* adjacent working day not confirmed yet: keep out of the totals until it is */
+            pendDays++; pendOt += res.ot || 0; pendAllow += (res.allowance ? 1 : 0) + (res.allowNext ? 1 : 0);
+            Object.assign(res, { pendOt: res.ot || 0, pendAllow: (res.allowance ? 1 : 0) + (res.allowNext ? 1 : 0), ot: 0, morning: 0, evening: 0, night: 0, post: 0, allowance: false, allowNext: false, adjHeld: true });
+          }
         }
         if (res.valid && res.overnight && res.kind === 'worked') contDates[nextDs] = ds;
         // last day of the month: everything after 00:00 (and the next day's allowance) belongs to the next month
@@ -410,13 +416,14 @@
       allowDays, allowPay, excessDays: allowDays - allowPay, dayCap,
       shortLeaves: slUsed, halfDays, lateUncovered: lateCnt, lateFreeCap: S.freeLatesPerMonth == null ? 2 : S.freeLatesPerMonth, lateHalf, midShort, shortLeaveCap: S.shortLeavesPerMonth == null ? 2 : S.shortLeavesPerMonth,
       leaveDays, offDays, workedDays, hourly: rt.hourly, daily: rt.daily,
+      pendDays, pendOt, pendAllow, pendAmount: round2((pendOt / 60) * rt.hourly + pendAllow * rt.daily),
       otAmount: round2((payMin / 60) * rt.hourly),
       allowAmount: round2(allowPay * rt.daily),
     };
   }
 
   const api = {
-    BUILD: '23', adjacency, builtinYears, DEFAULTS, mergeSettings, toMin, fmtTime, fmtDur, pad, parseDate, dateStr, addDays, dayTypeOf,
+    BUILD: '24', adjacency, builtinYears, DEFAULTS, mergeSettings, toMin, fmtTime, fmtDur, pad, parseDate, dateStr, addDays, dayTypeOf,
     cutoffFor, capFor, dayCapFor, calcDay, summarize, holidayMap, rates, round2, applyMin,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
