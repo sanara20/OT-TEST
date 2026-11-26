@@ -40,7 +40,7 @@
   const $ = (s, r) => (r || document).querySelector(s);
   const APP_VER = 'v24';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
-  const NOTE_SI = 'මෙය අතිකාල හා නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින්, දැනට කාර්යාල නිලධාරීන්ගේ රාජකාරි වේලාවන් පදනම් කරගෙන සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
+  const NOTE_SI = 'මෙය අතිකාල, නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම හා නිවාඩු සටහන් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින් සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
   let logoN = 0;
   function nrLogo(w) { const u = 'l' + (logoN++); return '<svg width="'+w+'" height="'+w+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="gd'+u+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C453"/><stop offset="1" stop-color="#D97706"/></linearGradient><mask id="m'+u+'"><rect width="120" height="120" fill="#fff"/><g transform="translate(60,60) scale(.66) translate(-57,-60)" stroke="#000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M34 82V38L56 82V38"/><path d="M56 38H68a11 11 0 0 1 0 22H56M66 60L80 82"/></g></mask></defs><rect x="4" y="4" width="112" height="112" rx="28" fill="#0A1931"/><path d="M27.1 41A38 38 0 0 1 89.1 35.6" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><path d="M92.9 79A38 38 0 0 1 30.9 84.4" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><circle cx="95.2" cy="45.8" r="4" fill="#1D4ED8"/><circle cx="24.8" cy="74.2" r="4" fill="#1D4ED8"/><circle cx="60" cy="60" r="29" fill="url(#gd'+u+')" mask="url(#m'+u+')"/></svg>'; }
@@ -216,7 +216,7 @@
       '<div class="sep"></div><span><b>TOTAL</b></span><b>' + money(sm.otAmount + sm.allowAmount) + '</b></div>' +
       '<button class="btn alt block" style="margin-top:10px" data-a="viewsum">සාරාංශය බලන්න</button></div>';
     if (DB.settings.baseSalary && DB.settings.legacy && (!String(DB.settings.name || '').trim() || !String(DB.settings.designation || '').trim())) out += '<div class="banner" style="background:var(--warnbg,#fff4d6);color:var(--warn,#7a5200)"><span>ඔබේ නම සහ තනතුර SETTINGS → පුද්ගලික පිටුවේ ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ)</span><button class="btn sm" data-a="gotoprofile">SETTINGS</button></div>';
-    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad);flex-direction:column;align-items:stretch;gap:8px"><b>ඔබ මේ ඇප් එක ඉස්සර පාවිච්චි කළ කෙනෙක්ද?</b><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm gold" data-a="helpstart">අලුත් කෙනෙක් ➜</button><button class="btn sm alt" data-a="gotoprofile">කලින් පාවිච්චි කළා ➜</button></div></div>';
+    if (!DB.settings.baseSalary) out += '<div class="banner" style="background:var(--badbg);color:var(--bad);flex-direction:column;align-items:stretch;gap:8px"><b>පළමුව මූලික තොරතුරු ඇතුළත් කරන්න</b><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm gold" data-a="gotoprofile">SETTINGS → පුද්ගලික ➜</button></div></div>';
     out += installCard();
     { const by = OT.builtinYears(window.LK_HOLIDAYS), now = new Date(), cy = now.getFullYear(), ex = DB.settings.holidayExtra || {};
       const has = (y) => by[y] || Object.keys(ex).some((d) => d.startsWith(y + '-'));
@@ -278,11 +278,6 @@
       '<span>සේවය කල දින ගණන</span><b>' + sm.workedDays + '</b>' +
       (sm.pendDays ? '<span style="color:var(--warn,#b45309)">⚠ තහවුරු වීමට නියමිත (' + sm.pendDays + ' දින)<br><small>ආසන්න වැඩකරන දිනය සටහන් කළාම එකතුවට එකතු වේ</small></span><b>' + money(sm.pendAmount) + '</b>' : '') +
       '<div class="sep"></div>' + lb('<b>OT + DAYS PAY</b>') + '<b style="font-size:20px">' + money(sm.otAmount + sm.allowAmount) + '</b></div></div>' +
-      '<div class="card"><h2>නිවාඩු සාරාංශය</h2><div class="tot">' +
-      lb2('කෙටි නිවාඩු' + (sm.midShort ? ' <small>(රාජකාරි මැද ' + sm.midShort + ')</small>' : ''), shortR) + '<b>' + sm.shortLeaves + '</b>' +
-      lb2('ආවරණය නොකළ ප්‍රමාද (සහන)', lateR) + '<b>' + Math.min(sm.lateUncovered, sm.lateFreeCap) + '</b>' +
-      lb2('ලබාගත් නිවාඩු', takenR) + '<b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + '</b>' +
-      lb2('ලබාගත් OFF / PH', offR) + '<b>' + sm.offDays + '</b></div></div>' +
       '<div class="card"><h2>OT</h2><div class="tot">' +
       '<span>අනුමත උපරිම පැය ගණන</span><b>' + (sm.capH != null ? sm.capH + ':00' : 'සීමාවක් නෑ') + '</b>' +
       lb('ඉටු කර ඇති OT පැය', 'ගණන') + '<b>' + dur(sm.otMin) + '</b>' +
@@ -300,6 +295,12 @@
       (claimed ? '<p class="mute" style="margin:10px 0 0">✅ මෙම මාසය ' + new Date(claimed.at).toLocaleDateString() + ' දින Save කර ඇත. නැවත තහවුරු කළොත් අලුත් අගයන් ආදේශ වේ.</p>' : '') +
       '<button class="btn gold block" style="margin-top:12px" data-a="claim">වවුචර් සකසන්න</button></div>';
     out += '<div class="card"><h2>දිනපතා සටහන්</h2>' + list + '</div>';
+    out +=
+      '<div class="card"><h2>නිවාඩු සාරාංශය</h2><div class="tot">' +
+      lb2('කෙටි නිවාඩු' + (sm.midShort ? ' <small>(රාජකාරි මැද ' + sm.midShort + ')</small>' : ''), shortR) + '<b>' + sm.shortLeaves + '</b>' +
+      lb2('ආවරණය නොකළ ප්‍රමාද (සහන)', lateR) + '<b>' + Math.min(sm.lateUncovered, sm.lateFreeCap) + '</b>' +
+      lb2('ලබාගත් නිවාඩු', takenR) + '<b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + '</b>' +
+      lb2('ලබාගත් OFF / PH', offR) + '<b>' + sm.offDays + '</b></div></div>';
     return out;
   }
 
@@ -511,7 +512,7 @@
     const S = DB.settings, st = view.st || 'me';
     let h = '<div class="seg stabs">' + STABS.map(([k, n]) => '<button class="' + (k === st ? 'on' : '') + '" data-a="stab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
     if (st === 'me') {
-      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0 0 8px"><b>කලින් මේ ඇප් එක පාවිච්චි කර BACKUP එකක් තියෙනවා නම් එයින් RESTORE කරන්න.</b></p><button class="btn gold block" data-a="gotoapp">ඇප් පිටුවට යන්න - RESTORE ➜</button></div>';
+      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0"><b>කලින් ගත් Backup File එකක් තියෙනවා නම් එයින් නම් </b><button class="btn gold sm" data-a="restorepick" style="display:inline-block;vertical-align:baseline">Restore කරන්න</button></p></div>';
       h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + '<label class="f"><span>සේවා ස්ථානය</span><input type="text" value="' + esc(STATION) + '" readonly disabled></label>' + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
       h += '<div class="card"><h2>පොදු 35 අ වවුචරය</h2>' + fld('ගෙවීම් ශාඛාව', 'payUnit', 'text') +
         fld('විෂය සංකේතය (උදා: AA, AB)', 'subjectCode', 'text') +
@@ -546,7 +547,7 @@
       h += '<!--OUT-->';
       h += '<div class="card" style="text-align:center;margin-top:12px"><div style="display:flex;justify-content:center;margin-bottom:10px">' + nrLogo(72) + '</div>' +
         '<button class="btn block" data-a="aboutapp">About App</button><div id="aboutAppBox" style="display:none;margin:10px 0;text-align:left"><div style="font-weight:700">OT Calculator · v' + APP_VER.replace('v', '') + '</div><div class="mute" style="margin-top:6px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div></div>' +
-        '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
+        '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe with Claude.ai</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
     }
     return h;
   }
@@ -554,14 +555,19 @@
   /* ---------- help ---------- */
   function renderHelp() {
     const sec = (title, body) => HELP_READY ? '<details class="card help"' + (view.helpOpen && title.indexOf(view.helpOpen) >= 0 ? ' open' : '') + '><summary><b>' + title + '</b></summary><div class="hb">' + body + '</div></details>' : '<div class="card help" data-a="helpna" style="cursor:pointer"><b>' + title + '</b></div>';
-    const li = (arr) => '<ul>' + arr.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
+    const STK = { 'පුද්ගලික': 'me', 'වැටුප / නීති': 'pay', 'අනුපාත / නීති': 'pay', 'සීමා': 'lim', 'PUBLIC HOLIDAYS': 'hol', 'ඇප්': 'app' };
+    const TABK = { 'මුල් පිටුව': 'home', 'මාසය': 'month', 'වවුචර්': 'claims' };
+    const lk = (t, st, label) => '<a class="hl" data-a="hgo" data-t="' + t + '"' + (st ? ' data-st="' + st + '"' : '') + '>' + label + '</a>';
+    const linkHelp = (x) => x
+      .replace(/SETTINGS → (පුද්ගලික|වැටුප \/ නීති|අනුපාත \/ නීති|සීමා|PUBLIC HOLIDAYS|ඇප්)/g, (m, k) => lk('settings', '', 'SETTINGS') + ' → ' + lk('settings', STK[k], k))
+      .replace(/"(මුල් පිටුව|මාසය|වවුචර්)"/g, (m, k) => '"' + lk(TABK[k], '', k) + '"');
+    const li = (arr) => '<ul>' + arr.map((x) => '<li>' + linkHelp(x) + '</li>').join('') + '</ul>';
     let h = '<div class="row sb" style="margin-bottom:10px"><b>' + lg('භාවිත මාර්ගෝපදේශය', 'User guide') + '</b>' + (EN_ON ? '<div class="seg" style="margin:0;width:170px"><button class="' + (LANG() === 'si' ? 'on' : '') + '" data-a="setlang" data-l="si">සිංහල</button><button class="' + (LANG() === 'en' ? 'on' : '') + '" data-a="setlang" data-l="en">English</button></div>' : '') + '</div>';
-    h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([
-      lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.'),
-      lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
-      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')]) + (Number(DB.settings.baseSalary) ? '' : '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>'));
+    h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([].concat(DB.settings.viaBrowser && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && navigator.standalone !== true ? [lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.')] : [], [
+      lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න. (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
+      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')])) + (Number(DB.settings.baseSalary) ? '' : '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>'));
     h += sec(lg('2. දිනපතා සටහන් කිරීම', '2. Daily entries'), li([
-      lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" ඔබන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
+      lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" තෝරා වෙලාව ඇතුලත් කරන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
       lg('එක් වේලාවක් පමණක් ඇතුළත් කර SAVE කරන්නත්, අනෙක් වේලාව පසුව ඇතුලත් කරන්නත් පුළුවන් (අසම්පූර්ණ දින ලකුණු වේ).', 'You may save only one time and add the other later (such days are marked incomplete).'),
       lg('පෙර දිනයක් සඳහා "වෙනත් දිනයක් තෝරන්න" හෝ "මාසය" පිටුවෙන් දිනය CLICK කර වේලාවන් ඇතුළත් කරන්න. සේවයට නොපැමිණි දිනයක සාමාන්‍ය දවසක නම් "නිවාඩු" හෝ විවේක දිනයක නම් "OFF DAY" ලෙස සලකුණු කරන්න.', 'For an earlier date tap "Pick another date" or open the Month tab and tap the day. Mark leave days as "Leave".'),
       lg('රාත්‍රිය පුරා සේවය නම් "රාත්‍රිය පුරා සේවය" ඔන් කර, පිටවීම ඊළඟ දවසේ වේලාව ඇතුළත් කරන්න.', 'For overnight duty switch on "Overnight duty" and enter the departure time of the next day.')]));
@@ -594,15 +600,14 @@
       lg('<b>හිලව් නිවාඩුවක් සඳහා ඉතිරි කරනවා</b> – විවේක දිනයක සාමාන්‍ය රාජකාරි වේලාවේ වැඩ කළ දවස දීමනාවක් වෙනුවට හිලව් නිවාඩුවකට ඉතිරි කරයි (දීමනාව ගෙවන්නේ නැත). සාමාන්‍ය රාජකාරි වේලාවට අමතර වැඩ කළ කාලයට OT ගෙවයි.', 'Save for compensatory leave.'),
       lg('<b>සම්පූර්ණ පැය ගණනම OT ලෙස</b> – දීමනාවක් වෙනුවට වැඩ කළ සියලු පැය OT ලෙස ගණනය කරයි.', 'Count all hours as OT.'),
       lg('<b>OT උදේ / හවස පමණයි</b> – සතියේ දවසක උදේ OT පමණක් හෝ හවස OT පමණක් ගනී.', 'Morning-only or evening-only OT.'),
-      lg('<b>මේ දවසේ OT / දීමනා ගන්නේ නෑ</b> – ඒ දවස ගෙවීමෙන් බැහැර කරයි.', 'Skip the day.'),
+      lg('<b>මේ දවසේ OT / දීමනා ගන්නේ නෑ</b> – ඒ දවස ගෙවීමෙන් ඉවත් කරයි.', 'Skip the day.'),
       lg('<b>OT අවසන් වේලාව:</b> OT 22:00 දක්වා අනුමත වී ඇතත්, යම් දවසක ඊට වෙනස් වෙලාවක් (උදා: 18.00) දක්වා පමණක් OT ගන්නේ නම්, ඒ දවසේ පේළියේ ඇති වේලා තේරීමෙන් එය තෝරන්න. 35 අ වවුචරයේ පෙන්වන්නේ ඔබ තෝරාගත් වේලාවයි.', 'Choose an OT end time per day.'),
       lg('"CLEAR" මඟින් තෝරා ගැනීම ඉවත් කළ හැක.', 'CLEAR removes the choice.')
     ])); 
     h += sec(lg('9. කෙටි නිවාඩු සහ වරුවක නිවාඩු', '9. Short leave and half-day leave'), li([
       lg('දවසේ නියමිත රාජකාරි කාලය සම්පූර්ණ කළ යුතුය. ප්‍රමාදයක් හෝ කෙටි / වරුවක නිවාඩුවක් නිසා අඩු වූ කාලය ඒ දවසේ කළ මුළු OT කාලයෙන් (උදේ + හවස + රාත්‍රි) අඩු කර, ඉතිරි කාලයට පමණක් ගෙවයි. ඉතිරි කාලයටත් අවම නීති (එක් පැත්තකට විනාඩි 30, දවසට පැය 1, විනාඩි 15 කොටස්) යෙදේ. උදා: OT පැය 2¼ න් කෙටි නිවාඩුවක් (1½) අඩු කළ විට ඉතිරි විනාඩි 45 යි; එය පැය 1 ට අඩු නිසා ගෙවන්නේ නැත. ඒ නිසා මෙය ප්‍රායෝගිකව බලපාන්නේ රාත්‍රි සේවය හෝ 18:00 ට පසුවත් OT ගන්නා විශේෂ කාල සීමා වලදීයි.', 'Late arrival or early departure on weekdays is treated as leave.'),
-      lg('<b>කෙටි නිවාඩුව</b> – එක දිගට පැය 1½ යි; කොටස් කර ගත නොහැක. පැමිණීම 09:01–10:00 අතර, පිටවීම 14:45–16:14 අතර, හෝ රාජකාරි අතරමැද ගත හැක. අතරමැද ගත් එක වවුචරය සකසද්දී විශේෂ දින කවුළුවේ සලකුණු කරන්න.', 'Short leave deducts 1½ hours.'),
-      lg('<b>වරුවක නිවාඩුව</b> – දින ½ යි, පැය 3½ අඩු වේ. උදේ හෝ හවස රාජකාරි වේලාව ඇතුළත අවම පැය 3½ ක් සේවය කර ගත හැක: පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. නැතිනම් දෙකෙළවරින් පිටත, රාජකාරි මැදින් අවම පැය 4 ක් සේවය කර උදේ / හවස අඩු කොටස් වරුවක නිවාඩුවක් ලෙස ගත හැක (OT නැත). එක දවසක ප්‍රමාදයත් කලින් පිටවීමත් (කොටස් දෙකක්) තිබුණොත් එය වරුවක නිවාඩුවකි.', 'Half-day leave deducts 3½ hours.'),
-      lg('කෙටි නිවාඩු මාසයකට 2 ක් පමණි (දින අනුපිළිවෙලින් පළමු දෙක). තුන්වැන්නේ සිට ඒවා වරුවක නිවාඩු ලෙස ගණන් වේ. ආවරණය නොකළ සහන ප්‍රමාද 2 ක් ඊට වෙනම ය.', 'Two short leaves per month.'),
+      lg('<b>කෙටි නිවාඩුව</b> – එක දිගට පැය 1½ යි; මාසයකට 2 ක් පමණි. පැමිණීම 09:01–10:00 අතර, පිටවීම 14:45–16:14 අතර, හෝ රාජකාරි අතරමැද ගත හැක. අතරමැද ගත් එක වවුචරය සකසද්දී විශේෂ දින කවුළුවේ සලකුණු කරන්න.', 'Short leave deducts 1½ hours.'),
+      lg('<b>වරුවක නිවාඩුව</b> – උදේ හෝ හවස රාජකාරි වේලාව ඇතුළත අවම පැය 3½ ක් සේවය කර ගත හැක: පැමිණීම 10:01–12:30 අතර, හෝ පිටවීම 12:00–14:44 අතර. නැතිනම් දෙකෙළවරින් පිටත, රාජකාරි මැදින් අවම පැය 4 ක් සේවය කර උදේ / හවස අඩු කොටස් වරුවක නිවාඩුවක් ලෙස ගත හැක (OT නැත). එක දවසක ප්‍රමාදයත් කලින් පිටවීමත් (කොටස් දෙකක්) තිබුණොත් එය වරුවක නිවාඩුවකි.', 'Half-day leave deducts 3½ hours.'),
       lg('"මාසය" පිටුවේ මාසික සාරාංශයට පහළින් ඇති "නිවාඩු සාරාංශය" කොටසෙන් ඒ මාසයේ කෙටි නිවාඩු, ආවරණය නොකළ ප්‍රමාද (සහන), ලබාගත් නිවාඩු (වරු සහ සම්පූර්ණ දින) සහ ලබාගත් OFF / PH බලාගන්න. අදාල දිනයන් ඒ යටින් පෙන්වයි.', 'Use the Leave summary at the bottom of the Month page to check the month\'s leave.'),
       lg('"මාසය" පිටුවේ දිනය යටතේ "කෙටි නිවාඩුව" / "වරුවක නිවාඩුව" ලෙස පෙන්වයි. ඒවා වෙනස් කිරීමට විශේෂ දින කවුළුවේ ඒ දවසේ පේළියෙන් තෝරන්න.', 'Shown as chips in the month list.'),
       
@@ -615,7 +620,7 @@
     ])); 
     h += sec(lg('11. වවුචරයේ මුදල අකුරින් පරීක්ෂා කිරීම', '11. Checking the amount in words'), li([
       lg('වවුචරය විවෘත කළ පසු "🔍 මුදල අකුරෙන් තිබෙන ආකාරය පරීක්ෂා කරන්න" ඔබන්න. මුදල අකුරින් ලියා ඇති ආකාරය පෙනෙයි.', 'Tap the check button on the voucher.'),
-      lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා වචන ඔබටම හදා සුරකින්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
+      lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා නිවැරදි කර SAVE කරන්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
     ])); 
     h += sec(lg('12. Google Lens භාවිතය', '12. Using Google Lens'), li([
       lg('SETTINGS → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ට, අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක.', 'Paste printed text instead of typing.'),
@@ -1144,6 +1149,7 @@
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
     helpstart() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'Google Lens'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
+    hgo(el) { if (view.tab === 'settings' && guardLeave()) return; view.tab = el.dataset.t; if (el.dataset.st) view.st = el.dataset.st; closeSheet(); render(); window.scrollTo(0, 0); },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
     prev() { shiftMonth(-1); render(); },
@@ -1201,6 +1207,7 @@
     cleardraft() { delete DB.entries[draftDate]; save(); closeSheet(); render(); },
     claim() { view.spAll = false; if (requireFields(['name', 'designation', 'baseSalary', 'salaryNo', 'workDesc', 'payUnit'], false)) return; { const un = unrecorded(view.month + '-01', view.month + '-31'); if (un.length) { unrecPopup(un); return; } } if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
     spmanual() { spPopup(true); },
+    restorepick() { view.tab = 'settings'; view.st = 'app'; render(); const f = document.getElementById('restore'); if (f) f.click(); },
     gotounrec(el) { const d = el.dataset.d; view.month = d.slice(0, 7); view.tab = 'month'; render(); setTimeout(() => { const it = document.querySelector('.item[data-d="' + d + '"]'); if (it) { it.scrollIntoView({ behavior: 'smooth', block: 'center' }); it.style.outline = '3px solid #e8b53a'; setTimeout(() => { it.style.outline = ''; }, 2500); } }, 60); },
     unrecedit(el) { const p = document.getElementById('unrec'); if (p) p.remove(); openEditor(el.dataset.d); },
     unrecleave(el) { DB.entries[el.dataset.d] = { status: 'leave' }; save(); render(); A.claim(); },
@@ -1448,9 +1455,9 @@
   function showDetails() {
     const S = DB.settings;
     if (S.welcomed) return;
-    const ov = fullScreen('detailsScreen', '<div style="font-size:42px">❓</div><div style="font-size:22px;font-weight:700;max-width:320px;line-height:1.5">ඔබ මේ ඇප් එක කලින් පාවිච්චි කළ කෙනෙක්ද?</div>' +
-      '<button id="wNew" style="' + BS + '">අලුත් කෙනෙක් ➜</button>' +
-      '<button id="wOld" style="' + BS + 'background:transparent;color:#e2e8f0;border:1px solid #64748b;font-weight:600">කලින් පාවිච්චි කළා ➜</button>');
+    const ov = fullScreen('detailsScreen', '<div style="font-size:42px">👤</div>' +
+      '<button id="wNew" style="' + BS + '">New User ➜</button>' +
+      '<button id="wOld" style="' + BS + 'background:transparent;color:#e2e8f0;border:1px solid #64748b;font-weight:600">Existing User ➜</button>');
     ov.querySelector('#wNew').onclick = () => { ov.remove(); DB.settings.welcomed = true; save(); A.helpstart(); };
     ov.querySelector('#wOld').onclick = () => { ov.remove(); toDetails(); };
   }
@@ -1475,18 +1482,19 @@
       '<button id="instBtn" style="' + bs + '">' + lg('📲 Install කරන්න', '📲 Install') + '</button>' +
       '<div id="instHelp" style="display:none;background:#1e293b;border-radius:12px;padding:12px;font-size:14px;max-width:320px;text-align:left">' +
         lg('Chrome වල උඩ දකුණු කෙළවරේ ⋮ (තිත් තුන) ඔබන්න → <b>"Install app"</b> (හෝ "Add to Home screen") තෝරන්න.', 'In Chrome tap ⋮ (top right) → choose <b>"Install app"</b> (or "Add to Home screen").') + '</div>' +
+      '<div style="opacity:.8;font-size:16px">' + lg('හෝ', 'or') + '</div>' +
       '<button id="instSkip" style="' + bs + 'background:transparent;color:#cbd5e1;border:1px solid #475569;font-size:15px;font-weight:400">' + lg('Browser එකෙන් ඉදිරියට යන්න', 'Continue in the browser') + '</button>');
     let finished = false;
     const success = () => {
       if (finished) return; finished = true;
       DB.settings.onboarded = true; DB.settings.installed = true; save();
       ov.innerHTML = '<div style="font-size:42px">✅</div><div style="font-size:19px;font-weight:700;max-width:320px;line-height:1.6">' +
-        lg('සාර්ථක ලෙස ඇප් එක install විය. පහත Close බොත්තම ඔබා, ෆෝන් එකේ ඇප් අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'The app was installed successfully. Tap Close below, then open the app from its icon on your phone.') + '</div>' +
-        '<button id="instClose" style="' + bs + '">' + lg('Close', 'Close') + '</button><div id="instNote" style="display:none;opacity:.85;font-size:14px;max-width:300px">' +
-        lg('Chrome ස්වයංක්‍රීයව වැසෙන්නේ නැත්නම් Chrome වසා, ෆෝන් එකේ "OT Calculator" අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'If Chrome does not close by itself, close it and open the "OT" icon on your phone.') + '</div>';
-      ov.querySelector('#instClose').onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { const n = document.getElementById('instNote'); if (n) n.style.display = 'block'; }, 400); };
+        lg('සාර්ථක ලෙස ඇප් එක install විය. දැන් Chrome වසා, ෆෝන් එකේ ඇප් අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'The app was installed successfully. Now close Chrome and open the app from its icon on your phone.') + '</div>' +
+        '<button id="instClose" style="' + bs + '">' + lg('Chrome වසන්න', 'Close Chrome') + '</button><div id="instNote" style="opacity:.9;font-size:14px;max-width:310px;line-height:1.6;text-align:left;background:#1e293b;border-radius:12px;padding:12px">' +
+        lg('ඉහත බොත්තමෙන් Chrome වැසෙන්නේ නැත්නම් (සමහර ෆෝන් වල එසේ වේ):<br>1. ෆෝන් එකේ <b>Recent apps</b> බොත්තම (□ හෝ තිරයේ පහළ සිට ඇඟිල්ල උඩට ඇද ඉන්න) ඔබන්න.<br>2. <b>Chrome</b> කාඩ්පත උඩට / පැත්තට swipe කර වසන්න.<br>3. ෆෝන් එකේ "OT Calculator" අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'If the button does not close Chrome (some phones): open Recent apps, swipe Chrome away, then open the app from its icon.') + '</div>';
+      ov.querySelector('#instClose').onclick = () => { try { window.close(); } catch (e) {} };
     };
-    ov.querySelector('#instSkip').onclick = () => { DB.settings.onboarded = true; save(); ov.remove(); showDetails(); };
+    ov.querySelector('#instSkip').onclick = () => { DB.settings.onboarded = true; DB.settings.viaBrowser = true; save(); ov.remove(); showDetails(); };
     ov.querySelector('#instBtn').onclick = async () => {
       let bip = deferredInstall || window.__bip;
       if (!bip) { await new Promise((r) => setTimeout(r, 1500)); bip = deferredInstall || window.__bip; }
