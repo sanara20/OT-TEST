@@ -40,7 +40,7 @@
   const $ = (s, r) => (r || document).querySelector(s);
   const APP_VER = 'v24';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
-  const NOTE_SI = 'මෙය අතිකාල, නිවාඩු දින දීමනා ගණනය කිරීම සහ වවුචර් සකස් කිරීම හා නිවාඩු සටහන් කිරීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම මත තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින් සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
+  const NOTE_SI = 'මෙය අතිකාල / නිවාඩු දින දීමනා ගණනය කිරීම, වවුචර් මුද්‍රණය කර ගැනීම හා නිවාඩු සටහන් තබා ගැනීම පහසු කර ගැනීම සඳහා, මගේ පෞද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම නිසා තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින් සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
   let logoN = 0;
   function nrLogo(w) { const u = 'l' + (logoN++); return '<svg width="'+w+'" height="'+w+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="gd'+u+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C453"/><stop offset="1" stop-color="#D97706"/></linearGradient><mask id="m'+u+'"><rect width="120" height="120" fill="#fff"/><g transform="translate(60,60) scale(.66) translate(-57,-60)" stroke="#000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M34 82V38L56 82V38"/><path d="M56 38H68a11 11 0 0 1 0 22H56M66 60L80 82"/></g></mask></defs><rect x="4" y="4" width="112" height="112" rx="28" fill="#0A1931"/><path d="M27.1 41A38 38 0 0 1 89.1 35.6" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><path d="M92.9 79A38 38 0 0 1 30.9 84.4" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round"/><circle cx="95.2" cy="45.8" r="4" fill="#1D4ED8"/><circle cx="24.8" cy="74.2" r="4" fill="#1D4ED8"/><circle cx="60" cy="60" r="29" fill="url(#gd'+u+')" mask="url(#m'+u+')"/></svg>'; }
@@ -159,9 +159,8 @@
     const last = S.lastBackup || S.backupFrom, days = Math.floor((Date.now() - last) / 86400000);
     if (days < 3 || S.backupSnooze === todayStr()) return '';
     return '<div class="card" style="border:2px solid #e8b53a"><b>⚠ ' + lg('Backup එකක් ගන්න', 'Time to take a backup') + '</b><div class="mute" style="margin:4px 0 8px">' +
-      (S.lastBackup ? lg('අන්තිමට Backup කලේ දින ' + days + 'කට කලින්.', 'Last backup ' + days + ' days ago.') : lg('තවම Backup එකක් ගෙන නෑ.', 'No backup taken yet.')) + ' ' +
-      lg('Backup File Downloads වලට Save වේ. පරණ ඒවා අතින් මකන්න (අලුත්ම 5ක් පමණක් තබා ගන්න).', 'Backup files are saved to Downloads. Delete old ones by hand (keep only the newest 5).') +
-      '</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold sm" data-a="backup">💾 ' + lg('Backup එකක් ගන්න', 'Download backup') + '</button><button class="btn alt sm" data-a="backupshare">📤 Share / WhatsApp</button><button class="btn alt sm" data-a="backuplater">' + lg('පසුව', 'Later') + '</button></div></div>';
+      (S.lastBackup ? lg('අන්තිමට Backup කලේ දින ' + days + ' කට කලින්.', 'Last backup ' + days + ' days ago.') : lg('තවම Backup එකක් ගෙන නෑ.', 'No backup taken yet.')) +
+      '</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold sm" data-a="backup">💾 Backup to Phone</button><button class="btn alt sm" data-a="backupshare">📤 Share</button><button class="btn alt sm" data-a="backuplater">' + lg('පසුව', 'Later') + '</button></div></div>';
   }
   function renderHome() {
     const sm = SUM();
@@ -512,7 +511,7 @@
     const S = DB.settings, st = view.st || 'me';
     let h = '<div class="seg stabs">' + STABS.map(([k, n]) => '<button class="' + (k === st ? 'on' : '') + '" data-a="stab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
     if (st === 'me') {
-      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0"><b>කලින් ගත් Backup File එකක් තියෙනවා නම් එයින් නම් </b><button class="btn gold sm" data-a="restorepick" style="display:inline-block;vertical-align:baseline">Restore කරන්න</button></p></div>';
+      if (!Number(DB.settings.baseSalary) && !DB.settings.name && !Object.keys(DB.entries || {}).length && !Object.keys(DB.claims || {}).length) h += '<div class="card" style="border:2px solid #e8b53a"><p style="margin:0"><b>කලින් ගත් Backup File එකක් තියෙනවා නම් එයින් </b><button class="btn gold sm" data-a="restorepick" style="display:inline-block;vertical-align:baseline">Restore කරන්න</button></p></div>';
       h += '<div class="card"><h2>පෞද්ගලික තොරතුරු</h2>' + fld('නම', 'name', 'text') + desigField() + '<label class="f"><span>සේවා ස්ථානය</span><input type="text" value="' + esc(STATION) + '" readonly disabled></label>' + fld('වැටුප් අංකය', 'salaryNo', 'text') + fld('මූලික වැටුප (රු.)', 'baseSalary', 'number') + '</div>';
       h += '<div class="card"><h2>පොදු 35 අ වවුචරය</h2>' + fld('ගෙවීම් ශාඛාව', 'payUnit', 'text') +
         fld('විෂය සංකේතය (උදා: AA, AB)', 'subjectCode', 'text') +
@@ -542,12 +541,12 @@
         '<button class="btn alt sm" data-a="notif">ALLOW NOTIFICATIONS</button>' +
         '<p class="mute" style="margin-bottom:0">ඇප් එක විවෘතව තිබෙන විට වේලාව පැමිණි විට දැනුම්දීමක් සහ බැනරයක් පෙන්වයි. ඇප් එක වසා තිබෙන විටත් වේලාවට එන දැනුම්දීම සඳහා APK අනුවාදය අවශ්‍යයි.</p></div>';
       h += '<div class="card"><h2>DATA BACKUP/RESTORE</h2><div class="row" style="flex-wrap:wrap"><button class="btn sm" data-a="backup">BACKUP</button>' +
-        '<label class="btn alt sm" style="cursor:pointer">RESTORE FROM BACKUP FILE<input type="file" accept="application/json" id="restore" hidden></label></div>' +
+        '<label class="btn alt sm" style="cursor:pointer">RESTORE FROM BACKUP FILE<input type="file" accept="application/json,.json,text/plain,.txt" id="restore" hidden></label></div>' +
         '<p class="mute" style="margin-bottom:0">Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ, ඒ නිසා දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.</p></div>';
       h += '<!--OUT-->';
       h += '<div class="card" style="text-align:center;margin-top:12px"><div style="display:flex;justify-content:center;margin-bottom:10px">' + nrLogo(72) + '</div>' +
         '<button class="btn block" data-a="aboutapp">About App</button><div id="aboutAppBox" style="display:none;margin:10px 0;text-align:left"><div style="font-weight:700">OT Calculator · v' + APP_VER.replace('v', '') + '</div><div class="mute" style="margin-top:6px;line-height:1.6">' + lg(NOTE_SI, NOTE_EN) + '</div></div>' +
-        '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe with Claude.ai</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
+        '<button class="btn block" style="margin-top:8px" data-a="about">About Developer</button><div id="aboutBox" style="display:none;margin-top:10px"><div style="font-weight:700">Made by Nalin Ranasinghe</div><div class="mute" style="font-size:11px">with Claude.ai</div><div class="mute" style="margin-top:2px">Version ' + APP_VER.replace('v', '') + '</div></div></div>';
     }
     return h;
   }
@@ -563,11 +562,12 @@
       .replace(/"(මුල් පිටුව|මාසය|වවුචර්)"/g, (m, k) => '"' + lk(TABK[k], '', k) + '"');
     const li = (arr) => '<ul>' + arr.map((x) => '<li>' + linkHelp(x) + '</li>').join('') + '</ul>';
     let h = '<div class="row sb" style="margin-bottom:10px"><b>' + lg('භාවිත මාර්ගෝපදේශය', 'User guide') + '</b>' + (EN_ON ? '<div class="seg" style="margin:0;width:170px"><button class="' + (LANG() === 'si' ? 'on' : '') + '" data-a="setlang" data-l="si">සිංහල</button><button class="' + (LANG() === 'en' ? 'on' : '') + '" data-a="setlang" data-l="en">English</button></div>' : '') + '</div>';
-    h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([].concat(DB.settings.viaBrowser && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && navigator.standalone !== true ? [lg('Chrome වල ⋮ මෙනුව → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" ඔබන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.')] : [], [
+    h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([].concat(DB.settings.viaBrowser && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && navigator.standalone !== true ? [lg('Chrome වල ⋮ Menu → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" තෝරන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.')] : [], [
       lg('SETTINGS → පුද්ගලික: නම, තනතුර, සේවා ස්ථානය සහ වැටුප් අංකය ඇතුළත් කරන්න. (වවුචරයට මුද්‍රණය වේ).', 'Settings → Personal: enter your name, designation, service station and salary number (printed on the vouchers).'),
-      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.')])) + (Number(DB.settings.baseSalary) ? '' : '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>'));
+      lg('SETTINGS → වැටුප් / නීති: මූලික වැටුප, OT සහ දීමනා ගණනය කරන අනුපාත (÷200/240, ÷30) සහ රාජකාරි වේලාවන් පරීක්ෂා කරන්න.', 'Settings → Pay / Rules: set your basic salary, the OT and allowance divisors (÷200/240, ÷30/20) and the normal duty times.'),
+      lg('SETTINGS → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ඇතුලත් කරන්න. අවශ්‍ය නම් අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක. [ෆෝන් එකේ Google Lens (හෝ Google ඇප්) මඟින් අවශ්‍ය කොටස "Copy text" කර "අතිකාල රාජකාරි විස්තරය" කොටුවේ "Paste" කරන්න. අවශ්‍ය නම් වෙනස් කර SAVE කරන්න.]', 'Settings → Personal: enter the overtime work description. You may copy and paste a printed list instead of typing (Google Lens → Copy text → Paste, then SAVE).')])) + (Number(DB.settings.baseSalary) ? '' : '<button class="btn gold block" data-a="gotoprofile" style="margin-top:8px">SETTINGS → පුද්ගලික ➜</button>'));
     h += sec(lg('2. දිනපතා සටහන් කිරීම', '2. Daily entries'), li([
-      lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" ඔබන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" තෝරා වෙලාව ඇතුලත් කරන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
+      lg('"මුල් පිටුව": රාජකාරියට පැමිණි විට "පැමිණීම = දැන්", පිටවන විට "පිටවීම = දැන්" තෝරන්න. වෙනත් වේලාවක් නම් "වෙනත් වේලාවක්" තෝරා වෙලාව ඇතුලත් කරන්න.', 'On the Home tab tap "Arrival = now" when you arrive and "Departure = now" when you leave. For another time tap "Other time".'),
       lg('එක් වේලාවක් පමණක් ඇතුළත් කර SAVE කරන්නත්, අනෙක් වේලාව පසුව ඇතුලත් කරන්නත් පුළුවන් (අසම්පූර්ණ දින ලකුණු වේ).', 'You may save only one time and add the other later (such days are marked incomplete).'),
       lg('පෙර දිනයක් සඳහා "වෙනත් දිනයක් තෝරන්න" හෝ "මාසය" පිටුවෙන් දිනය CLICK කර වේලාවන් ඇතුළත් කරන්න. සේවයට නොපැමිණි දිනයක සාමාන්‍ය දවසක නම් "නිවාඩු" හෝ විවේක දිනයක නම් "OFF DAY" ලෙස සලකුණු කරන්න.', 'For an earlier date tap "Pick another date" or open the Month tab and tap the day. Mark leave days as "Leave".'),
       lg('රාත්‍රිය පුරා සේවය නම් "රාත්‍රිය පුරා සේවය" ඔන් කර, පිටවීම ඊළඟ දවසේ වේලාව ඇතුළත් කරන්න.', 'For overnight duty switch on "Overnight duty" and enter the departure time of the next day.')]));
@@ -588,12 +588,15 @@
       lg('වවුචරය විවෘත කර "📄 PDF SAVE කරන්න (A4)" ඔබන්න. වවුචරය A4 PDF එකක් ලෙස ෆෝන් එකේ Downloads වලට සුරැකේ. ඒ ගොනුව print කරන්න (Scale 100%, "Fit to page" නොවේ). ෆෝන් එකට printer එකක් සම්බන්ධ කර ඇත්නම් "PRINT" ඔබා A4, Margins = None, Scale = 100%, "Background graphics" ඔන් කර Print කරන්න.', 'To print tap "Print / PDF", then in the Chrome print dialog choose paper size A4, Margins = None, Scale = 100% and tick "Background graphics". Choose "Save as PDF" to make a PDF.'),
       lg('35 අ වගුවේ දිනයට මුලින් SA (සෙනසුරාදා), SU (ඉරිදා), PH (රජයේ නිවාඩු) ලකුණු කෙරේ. පේළි 31 ක් දක්වා එක පිටුවේ ඇතුළත් වේ, ඊට වැඩි නම් දෙවන පිටුවක් එකතු වේ.', 'In the Gen 35a table dates are prefixed SA (Saturday), SU (Sunday) or PH (public holiday). Up to 31 rows fit on one page; more rows continue on a second page.')]));
     h += sec(lg('6. PUBLIC HOLIDAYS', '6. Holidays'), li([
-      lg('2026 සහ 2027 රජයේ ප්‍රසිද්ධ නිවාඩු දින ඇතුළත්ය. ඉන් පසු වසර වල සිංහල අවුරුදු (අප්‍රේල් 13, 14), මැයි 1, නත්තල, පෙබරවාරි 4 ස්වයංක්‍රීයව ඇතුළත් වේ; පොහොය දින ඇතුළු අනෙක් දින එක් කළ යුතුය. අමතර නිවාඩුවක් ප්‍රකාශයට පත් වුවහොත් SETTINGS → PUBLIC HOLIDAYS වලින් එක් කරන්න, අනවශ්‍ය දිනයක් ඉවත් කරන්න. නැතිනම් ඇප් එකේ අලුත් අනුවාදයක් ලැබෙන තෙක් බලන්න.', 'Public holidays for 2026 and 2027 are built in. After that only fixed-date holidays (Apr 13/14, May 1, Feb 4, Dec 25) are added automatically; add Poya days and others yourself. If the government announces an extra holiday, add it in Settings → Holidays; you can also remove a day.')]));
+      lg('2026 සහ 2027 රජයේ ප්‍රසිද්ධ නිවාඩු දින ඇතුළත්ය. ඉන් පසු වසර වල සිංහල අවුරුදු (අප්‍රේල් 13, 14), මැයි 1, නත්තල, පෙබරවාරි 4 ස්වයංක්‍රීයව ඇතුළත් වේ; පොහොය දින ඇතුළු අනෙක් දින එක් කළ යුතුය.', 'Public holidays for 2026 and 2027 are built in. After that only fixed-date holidays (Apr 13/14, May 1, Feb 4, Dec 25) are added automatically; add Poya days and others yourself.'),
+      lg('අමතර නිවාඩුවක් ප්‍රකාශයට පත් වුවහොත් SETTINGS → PUBLIC HOLIDAYS වලින් එක් කරන්න, අනවශ්‍ය දිනයක් ඉවත් කරන්න. නැතිනම් ඇප් එකේ අලුත් අනුවාදයක් ලැබෙන තෙක් බලන්න.', 'If the government announces an extra holiday, add it in Settings → Public holidays; you can also remove a day.')]));
     h += sec(lg('7. දත්ත ආරක්ෂාව සහ යාවත්කාලීන කිරීම', '7. Data safety and updating'), li([
-      lg('ඔබේ දත්ත ඇත්තේ ෆෝන් එකේ Chrome තුළ පමණි, Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ. SETTINGS → ඇප් → "BACKUP එකක් ගන්න" මගින් දින 03කට වතාවක්වත් BACKUP එකක් ගන්න.', 'Your data is stored only inside Chrome on this phone. Take a backup regularly from Settings → App → "Download backup file".'),
+      lg('ඔබේ දත්ත ඇත්තේ ෆෝන් එකේ Google Chrome තුළ පමණි, Google Chrome එකේ දත්ත මැකුවොත් ඇප් එකේ දත්ත නැති වේ. වරින් වර SETTINGS → ඇප් → "BACKUP එකක් ගන්න" මගින් දින 03කට වතාවක්වත් BACKUP එකක් ගන්න. එසේ නැතිනම් දින 03කට වතාවක් මුල් පිටුවේ එන "Backup එකක් ගන්න පණිවිඩය" අනුව පහත පරිදි කටයුතු කරන්න.', 'Your data is stored only inside Chrome on this phone. Take a backup regularly from Settings → App, or follow the Home-page backup reminder as below.'),
+      lg('Backup to Phone : Phone → Downloads වලට Save වේ. අලුත්ම 5ක් පමණ තබාගෙන පරණ ඒවා අතින් මකන්න.', 'Backup to Phone: saved to Downloads. Keep about the newest 5 and delete old ones by hand.'),
+      lg('Share : WhatsApp, Google Drive, email, Telegram වගේ තැනකට කෙලින්ම යවන්න පුළුවන් share කවුළුව විවෘත වෙනවා, ෆෝන් එක නැති වුණොත් හෝ reset කළොත් Downloads වල ගොනුවත් නැති වෙනවා. ඒ නිසා ගොනුව වෙන තැනකටත් යවන එක ආරක්ෂිතයි.', 'Share: opens the share sheet so you can send the file to WhatsApp, Google Drive, email or Telegram; a copy outside the phone is safer.'),
       lg('ඇප් එකේ අලුත් අනුවාදයක් එකතු කලොත් දැනට තිබෙන දත්ත වෙනසක් නොවී පවතී. දත්ත හිස් උනොත් ආසන්නතම BACKUP FILE එකකින් RESTORE කරගන්න.', 'Upload new versions of the app to the same site (the Deploys page on Netlify). A new site shows empty data; if that happens restore your backup file.')]));
     h += sec(lg('8. විශේෂ දින (හිලව් නිවාඩු, OT/දීමනා නොගැනීම)', '8. Special days'), li([
-      lg('සටහන් නැති දින: පළමු සටහන දැමූ දිනයේ සිට ඉදිරියට, ගිය හැම දවසකටම සටහනක් (වේලාවන්, නිවාඩු හෝ OFF) තිබිය යුතුය. දින 3කට වඩා පරණ සටහන් නැති දින තිබේ නම් මුල් පිටුවේ මතක් කෙරේ. වවුචරය සකසද්දී සටහන් නැති දින ඇත්නම් ඒවා ලැයිස්තුවක් ලෙස පෙන්වයි; සතියේ දින තනි තනිව සටහන් කරන්න, සෙනසුරාදා / ඉරිදා / PH ලැයිස්තුව බලා එකවර OFF ලෙස තහවුරු කළ හැක.', 'Every past day needs a record or a confirmation before vouchers can be made.'),
+      lg('සටහන් නැති දින: පළමු සටහන දැමූ දිනයේ සිට ඉදිරියට, පසුගිය හැම දවසකටම සටහනක් (වේලාවන්, නිවාඩු හෝ OFF) තිබිය යුතුය. දින 3කට වඩා පරණ සටහන් නැති දින තිබේ නම් මුල් පිටුවේ මතක් කෙරේ. වවුචරය සකසද්දී සටහන් නැති දින ඇත්නම් ඒවා ලැයිස්තුවක් ලෙස පෙන්වයි; සතියේ දින තනි තනිව සටහන් කරන්න, සෙනසුරාදා / ඉරිදා / PH ලැයිස්තුව බලා එකවර OFF ලෙස තහවුරු කළ හැක.', 'Every past day needs a record or a confirmation before vouchers can be made.'),
       lg('මාසය අවසානයේ "මාසය" පිටුවෙන් "වවුචර් සකසන්න" ඔබන විට, විශේෂ තීරණයක් ගැනීමට අවශ්‍ය දවසක් (සති අන්ත / නිවාඩු දිනයක වැඩ කිරීම, නිවාඩුවක් සමඟ OT තිබීම, OT 18:00 ට පසුවත් ගන්නා දවසක් වැනි) තිබේ නම් පමණක් "විශේෂ දින" කවුළුවක් එයි. නැතිනම් කෙලින්ම වවුචරයට යයි.', 'A special-days window appears only when needed.'),
       lg('වවුචරය සකසද්දී විශේෂ දින කවුළුවේ මේවාත් අසයි: (අ) රාජකාරි මැදදී ගත් කෙටි නිවාඩු ඇත්නම් ඒ දවස් සලකුණු කිරීම; (ආ) ආවරණය නොකළ ප්‍රමාද තිබී කෙටි නිවාඩු ඉතිරිව ඇත්නම්, ඒවා කෙටි නිවාඩු ලෙස ගන්නද යන්න.', 'The special-days window also asks about mid-day short leaves and uncovered lates.'),
       lg('දවස් ටික් කර පහළින් විකල්පයක් තෝරන්න. එය ටික් කළ සියලු දවස් වලට එකවර යෙදේ:', 'Tick days, then choose an option.'),
@@ -622,15 +625,13 @@
       lg('වවුචරය විවෘත කළ පසු "🔍 මුදල අකුරෙන් තිබෙන ආකාරය පරීක්ෂා කරන්න" ඔබන්න. මුදල අකුරින් ලියා ඇති ආකාරය පෙනෙයි.', 'Tap the check button on the voucher.'),
       lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා නිවැරදි කර SAVE කරන්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
     ])); 
-    h += sec(lg('12. Google Lens භාවිතය', '12. Using Google Lens'), li([
-      lg('SETTINGS → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය" ට, අතින් ටයිප් නොකර මුද්‍රිත ලැයිස්තුවක් Copy කර Paste කළ හැක.', 'Paste printed text instead of typing.'),
-      lg('ෆෝන් එකේ Google Lens (හෝ Google ඇප්) විවෘත කර මුද්‍රිත ලැයිස්තුව දෙසට කැමරාව යොමු කරන්න. "Text" තෝරා, අවශ්‍ය කොටස තෝරා "Copy text" ඔබන්න.', 'Open Google Lens and copy the text.'),
-      lg('OT ඇප් එකට ආපසු ගොස් "අතිකාල රාජකාරි විස්තරය" කොටුවේ ඔබාගෙන සිට "Paste" කරන්න. අවශ්‍ය නම් සංස්කරණය කර SAVE කරන්න.', 'Paste into the description box and save.')
-    ])); 
-    h += sec(lg('SAVE SETTINGS', '13. Saving settings'), li([
+    h += sec(lg('SAVE SETTINGS', '12. Saving settings'), li([
       lg('SETTINGS පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
       lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යාමට නොහැක; අනතුරු ඇඟවීමක් එයි. "SETTINGS → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
     ])); 
+    h += sec(lg('අදහස් හා යෝජනා', '13. Ideas and suggestions'), li([
+      lg('ඇප් එක වැඩිදියුණු කිරීම සඳහා සහ සංශෝධනය කිරීම සඳහා ඔබේ අදහස් කියන්න.', 'Tell us your ideas to improve and refine the app.')
+    ]));
     return h;
   }
 
@@ -1148,7 +1149,7 @@
     unlock() { if (grpOf(view.st || 'me') === 'x') DB.settings.lockedX = false; else DB.settings.locked = false; view.dirty = true; save(); render(); },
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
     helpstart() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
-    helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'Google Lens'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
+    helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     hgo(el) { if (view.tab === 'settings' && guardLeave()) return; view.tab = el.dataset.t; if (el.dataset.st) view.st = el.dataset.st; closeSheet(); render(); window.scrollTo(0, 0); },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
@@ -1307,11 +1308,14 @@
       render();
     },
     async backupshare() {
-      const f = new File([backupBlob()], 'OT-backup-' + todayStr() + '.json', { type: 'application/json' });
+      const nm = 'OT-backup-' + todayStr();
+      const blob = backupBlob();
       try {
-        if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: 'OT backup' }); DB.settings.lastBackup = Date.now(); save(); render(); }
-        else A.backup();
-      } catch (e) { /* cancelled */ }
+        const f = new File([blob], nm + '.txt', { type: 'text/plain' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: nm }); DB.settings.lastBackup = Date.now(); save(); render(); return; }
+        if (navigator.share) { await navigator.share({ title: nm, text: await blob.text() }); DB.settings.lastBackup = Date.now(); save(); render(); return; }
+        toast(lg('මේ ෆෝන් එකේ Share කළ නොහැක. "Backup to Phone" භාවිතා කරන්න.', 'Sharing is not available here. Use "Backup to Phone".'), true);
+      } catch (e) { if (e && e.name !== 'AbortError') toast(lg('Share කළ නොහැකි විය. "Backup to Phone" භාවිතා කරන්න.', 'Could not share. Use "Backup to Phone".'), true); }
     },
     backuplater() { DB.settings.backupSnooze = todayStr(); save(); render(); },
   };
@@ -1480,8 +1484,6 @@
     const bs = BS;
     const ov = fullScreen('instScreen', '<div style="font-size:42px">📲</div>' +
       '<button id="instBtn" style="' + bs + '">' + lg('📲 Install කරන්න', '📲 Install') + '</button>' +
-      '<div id="instHelp" style="display:none;background:#1e293b;border-radius:12px;padding:12px;font-size:14px;max-width:320px;text-align:left">' +
-        lg('Chrome වල උඩ දකුණු කෙළවරේ ⋮ (තිත් තුන) ඔබන්න → <b>"Install app"</b> (හෝ "Add to Home screen") තෝරන්න.', 'In Chrome tap ⋮ (top right) → choose <b>"Install app"</b> (or "Add to Home screen").') + '</div>' +
       '<div style="opacity:.8;font-size:16px">' + lg('හෝ', 'or') + '</div>' +
       '<button id="instSkip" style="' + bs + 'background:transparent;color:#cbd5e1;border:1px solid #475569;font-size:15px;font-weight:400">' + lg('Browser එකෙන් ඉදිරියට යන්න', 'Continue in the browser') + '</button>');
     let finished = false;
@@ -1489,9 +1491,9 @@
       if (finished) return; finished = true;
       DB.settings.onboarded = true; DB.settings.installed = true; save();
       ov.innerHTML = '<div style="font-size:42px">✅</div><div style="font-size:19px;font-weight:700;max-width:320px;line-height:1.6">' +
-        lg('සාර්ථක ලෙස ඇප් එක install විය. දැන් Chrome වසා, ෆෝන් එකේ ඇප් අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'The app was installed successfully. Now close Chrome and open the app from its icon on your phone.') + '</div>' +
-        '<button id="instClose" style="' + bs + '">' + lg('Chrome වසන්න', 'Close Chrome') + '</button><div id="instNote" style="opacity:.9;font-size:14px;max-width:310px;line-height:1.6;text-align:left;background:#1e293b;border-radius:12px;padding:12px">' +
-        lg('ඉහත බොත්තමෙන් Chrome වැසෙන්නේ නැත්නම් (සමහර ෆෝන් වල එසේ වේ):<br>1. ෆෝන් එකේ <b>Recent apps</b> බොත්තම (□ හෝ තිරයේ පහළ සිට ඇඟිල්ල උඩට ඇද ඉන්න) ඔබන්න.<br>2. <b>Chrome</b> කාඩ්පත උඩට / පැත්තට swipe කර වසන්න.<br>3. ෆෝන් එකේ "OT Calculator" අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'If the button does not close Chrome (some phones): open Recent apps, swipe Chrome away, then open the app from its icon.') + '</div>';
+        lg('සාර්ථක ලෙස ඇප් එක install විය. දැන් Chrome එක close කර, ෆෝන් එකේ ඇප් අයිකනය ඔබා ඇප් එක විවෘත කරන්න.', 'The app was installed successfully. Now close Chrome and open the app from its icon on your phone.') + '</div>' +
+        '<button id="instClose" style="' + bs + '">' + lg('Close', 'Close') + '</button><div id="instNote" style="opacity:.9;font-size:15px;max-width:310px;line-height:1.6">' +
+        lg('ස්වයංක්‍රීයව Chrome වැසෙන්නේ නැත්නම් එය Close කරන්න.', 'If Chrome does not close by itself, close it yourself.') + '</div>';
       ov.querySelector('#instClose').onclick = () => { try { window.close(); } catch (e) {} };
     };
     ov.querySelector('#instSkip').onclick = () => { DB.settings.onboarded = true; DB.settings.viaBrowser = true; save(); ov.remove(); showDetails(); };
@@ -1499,7 +1501,7 @@
       let bip = deferredInstall || window.__bip;
       if (!bip) { await new Promise((r) => setTimeout(r, 1500)); bip = deferredInstall || window.__bip; }
       if (bip) { bip.prompt(); let r = null; try { r = await bip.userChoice; } catch (e) {} deferredInstall = window.__bip = null; if (r && r.outcome === 'accepted') success(); }
-      else ov.querySelector('#instHelp').style.display = 'block';
+      else toast(lg('මේ මොහොතේ Install කළ නොහැක. "Browser එකෙන් ඉදිරියට යන්න" ඔබන්න.', 'Cannot install right now. Tap "Continue in the browser".'), true);
     };
     window.addEventListener('appinstalled', success, { once: true });
   }
