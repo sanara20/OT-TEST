@@ -1,8 +1,8 @@
 {
   "id": "./index.html",
-  "name": "OT Calculator",
-  "short_name": "OT Calculator",
-  "description": "අතිකාල සහ දෛනික දීමනා ගණනය",
+  "name": "Duty Desk",
+  "short_name": "Duty Desk",
+  "description": "අතිකාල · දීමනා · නිවාඩු",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

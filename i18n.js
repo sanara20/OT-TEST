@@ -15,7 +15,7 @@
      
     /* settings tabs */
      'වැටුප් / නීති': 'Pay / Rules',   
-    'පෞද්ගලික තොරතුරු': 'Personal details',  'තනතුර': 'Designation', 'සේවා ස්ථානය': 'Service station', 'වැටුප් අංකය': 'Salary number',
+    'පුද්ගලික තොරතුරු': 'Personal details',  'තනතුර': 'Designation', 'සේවා ස්ථානය': 'Service station', 'වැටුප් අංකය': 'Salary number',
     'පොදු 35 අ වවුචරය': 'Gen 35a voucher', 'ගෙවීම් ඒකකය': 'Pay unit', 'ගිණුම්': 'Accounts',
     'විෂය සංකේතය (උදා: AA, AB)': 'Subject code (e.g. AA, AB)', 'අතිකාල රාජකාරි විස්තරය': 'Overtime duty description',
     'දිගු විස්තරයක් නම් කොටස් වශයෙන් අනු අංක යටතේ ලියන්න (1. ... 2. ...). Enter ඔබා නව පේළියක් ආරම්භ කරන්න. හිස් නම් වවුචරයේ විෂය සංකේත වාක්‍යය පමණක් මුද්‍රණය වේ.': 'For a long description write the parts under numbers (1. ... 2. ...). Press Enter for a new line. If empty only the subject code line is printed on the voucher.',

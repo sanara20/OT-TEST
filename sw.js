@@ -1,6 +1,6 @@
-const CACHE = 'ot-calc-v24';
-const FILES = ['./', './index.html', './app.js?v=24', './engine.js?v=24', './holidays.js?v=24', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './forms/gen35-front.png', './forms/gen35-back.png', './forms/gen35a-1.png', './forms/gen35a-2.png', './fonts/FreeSerif-si.woff', './fonts/FreeSerifBold-si.woff', './i18n.js?v=24'];
+const CACHE = 'ot-calc-v26';
+const FILES = ['./', './index.html', './app.js?v=26', './engine.js?v=26', './holidays.js?v=26', './manifest.webmanifest',
+  './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './forms/gen35-front.png', './forms/gen35-back.png', './forms/gen35a-1.png', './forms/gen35a-2.png', './fonts/FreeSerif-si.woff', './fonts/FreeSerifBold-si.woff', './i18n.js?v=26'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => Promise.all(FILES.map((u) => fetch(new Request(u, { cache: 'reload' })).then((r) => { if (!r.ok) throw new Error(u); return c.put(u, r); })))).then(() => self.skipWaiting()));
