@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  if (window.__BUILD !== '26' || !window.OT || window.OT.BUILD !== '26') { /* mixed cached files: clear caches once and reload */
+  if (window.__BUILD !== '28' || !window.OT || window.OT.BUILD !== '28') { /* mixed cached files: clear caches once and reload */
     try { if (!sessionStorage.getItem('ot.heal')) { sessionStorage.setItem('ot.heal', '1');
       Promise.all([(navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))) : 0), (window.caches ? caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))) : 0)]).then(() => location.reload(), () => location.reload()); return; } } catch (e) {}
     const sp = document.getElementById('splash'); if (sp) sp.remove();
@@ -38,7 +38,7 @@
 
   /* ---------- helpers ---------- */
   const $ = (s, r) => (r || document).querySelector(s);
-  const APP_VER = 'v26';
+  const APP_VER = 'v28';
   const fmtL = (n) => (n % 1 ? (Math.floor(n) || '') + '½' : String(n));
   const NOTE_SI = 'මෙය අතිකාල / නිවාඩු දින දීමනා ගණනය කිරීම, වවුචර් මුද්‍රණය කර ගැනීම හා නිවාඩු සටහන් තබා ගැනීම පහසු කර ගැනීම සඳහා, මගේ පුද්ගලික භාවිතයට නිර්මාණය කළ ඇප් එකකි. කිහිප දෙනෙකුගේ ඉල්ලීම නිසා තවත් අයෙකුට භාවිතා කිරීමට පහසු වන අයුරින් සකසා ඇත. කැමති කෙනෙකුට එය භාවිතා කළ හැක. ගණනය කිරීම් සහ වවුචර් ආයතනයේ නීති රීතිවලට අනුකූලදැයි භාවිතයට පෙර ඔබම පරීක්ෂා කර ගන්න. මෙම ඇප් එක භාවිතයෙන් මතු විය හැකි කිසිදු නීතිමය හෝ මූල්‍යමය ගැටලුවකට මම වගකියන්නේ නැත; එය භාවිත කරන්නාගේම වගකීමකි.';
   const NOTE_EN = 'This app was created for my own personal use, to make overtime and holiday-duty allowance calculations and voucher preparation easier. Anyone is welcome to use it. It is not an official government application. Please check, before using it, that the calculations and vouchers comply with your own institution\'s rules. The developer accepts no responsibility for any legal or financial issues that may arise from using this app; its use is at the user\'s own responsibility.';
@@ -105,11 +105,11 @@
     document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.t === view.tab));
     const showNav = view.tab === 'home' || view.tab === 'month';
     document.querySelectorAll('header.top .iconbtn,#mname').forEach((e) => { e.style.visibility = showNav ? 'visible' : 'hidden'; });
-    $('#ttl').textContent = { home: 'Duty Desk', month: 'මාසික සටහන', claims: 'වවුචර්', settings: 'SETTINGS', help: 'උදවු' }[view.tab];
+    $('#ttl').textContent = { home: 'Duty Desk', month: 'මාසික සටහන', leave: 'නිවාඩු', settings: 'SETTINGS', help: 'උදවු' }[view.tab];
     const app = $('#app');
     if (view.tab === 'home') app.innerHTML = renderHome();
     else if (view.tab === 'month') app.innerHTML = renderMonth();
-    else if (view.tab === 'claims') app.innerHTML = renderClaims();
+    else if (view.tab === 'leave') app.innerHTML = renderLeaveTab();
     else if (view.tab === 'help') app.innerHTML = renderHelp();
     else app.innerHTML = renderSettings();
   }
@@ -272,6 +272,7 @@
     const lateR = rowsOf((x) => x.res.uncovered).slice(0, sm.lateFreeCap);
     const takenR = rowsOf((x) => x.res.kind === 'leave' || x.res.leave === 'half');
     const offR = rowsOf((x) => x.res.kind === 'off');
+    const takenGrp = ['c', 'v', 'o', 'l', ''].map((k) => { const rs = takenR.filter((x) => (LV().types[x.date] || '') === k); return rs.length ? '<div style="grid-column:1/-1;margin:0 0 4px"><small><b>' + (LVN[k] || 'වර්ගය තෝරා නැත') + '</b></small><br><small style="color:var(--acc,#b7791f);font-weight:600">' + rs.map((x) => dayNum(x.date) + (x.res.kind === 'leave' ? '' : ' (½)') + (k === 'l' && LV().lieu[x.date] ? ' [' + LV().lieu[x.date].slice(5).replace('-', '.') + ']' : '')).join(', ') + '</small></div>' : ''; }).join('');
     const lb2 = (a, rs) => '<span>' + a + dl(rs) + '</span>';
     let out = '<div class="card" id="mSum"><h2>' + monthLabel(view.month) + ' සාරාංශය</h2><div class="tot">' +
       '<span>සේවය කල දින ගණන</span><b>' + sm.workedDays + '</b>' +
@@ -293,16 +294,16 @@
       '<div class="sep"></div><span><b>' + dvTxt + ' දීමනාව</b></span><b>' + money(sm.allowAmount) + '</b></div>' +
       (claimed ? '<p class="mute" style="margin:10px 0 0">✅ මෙම මාසය ' + new Date(claimed.at).toLocaleDateString() + ' දින Save කර ඇත. නැවත තහවුරු කළොත් අලුත් අගයන් ආදේශ වේ.</p>' : '') +
       '<button class="btn gold block" style="margin-top:12px" data-a="claim">වවුචර් සකසන්න</button></div>';
-    out += '<div class="card"><h2>දිනපතා සටහන්</h2>' + list + '</div>';
+    const daysHtml = '<div class="card"><h2>දිනපතා සටහන්</h2>' + list + '</div>';
     out +=
       '<div class="card"><h2>නිවාඩු සාරාංශය</h2><div class="tot">' +
       lb2('කෙටි නිවාඩු' + (sm.midShort ? ' <small>(රාජකාරි මැද ' + sm.midShort + ')</small>' : ''), shortR) + '<b>' + sm.shortLeaves + '</b>' +
       lb2('ආවරණය නොකළ ප්‍රමාද (සහන)', lateR) + '<b>' + Math.min(sm.lateUncovered, sm.lateFreeCap) + '</b>' +
-      lb2('ලබාගත් නිවාඩු', takenR) + '<b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + '</b>' +
+      '<span>ලබාගත් නිවාඩු</span><b>' + fmtL(sm.leaveDays + sm.halfDays / 2) + '</b>' + takenGrp +
       lb2('ලබාගත් OFF / PH', offR) + '<b>' + sm.offDays + '</b></div>' +
-      (takenR.length ? '<div class="sep" style="margin:10px 0"></div><div class="mute" style="margin-bottom:6px">ලබාගත් නිවාඩු වර්ගය තෝරන්න</div>' + takenR.map((x) => '<div class="row" style="gap:8px;margin-bottom:6px;align-items:center"><span style="flex:1">' + dayNum(x.date) + ' ' + DAYS_S[wd(x.date)] + (x.res.kind === 'leave' ? '' : ' (½)') + '</span>' + lvSel(x.date, LV().types[x.date] || '', 'width:120px') + '</div>').join('') : '') +
       '<button class="btn alt block" style="margin-top:10px" data-a="lvopen">📅 අවුරුද්දේ නිවාඩු</button></div>';
-    return out;
+    const ms = view.ms || 'sum';
+    return '<div class="seg stabs">' + [['sum', 'සාරාංශය'], ['days', 'දිනපතා සටහන්'], ['vch', 'වවුචර්']].map(([k, n]) => '<button class="' + (k === ms ? 'on' : '') + '" data-a="mstab" data-s="' + k + '">' + n + '</button>').join('') + '</div>' + (ms === 'days' ? daysHtml : ms === 'vch' ? renderClaims() : out);
   }
 
   function unrecPopup(un) {
@@ -499,9 +500,10 @@
   }
 
   /* ---------- leave ledger: DB.leave = { types:{date:'c'|'v'|'o'}, log:[{d,amt,t}], prev:[{y,c,v}] } ---------- */
-  const LV = () => { const L = DB.leave = DB.leave || {}; L.types = L.types || {}; L.log = L.log || []; L.prev = L.prev || []; return L; };
-  const LVN = { c: 'අනියම්', v: 'විවේක', o: 'රාජකාරි' };
-  const lvSel = (d, t, extra) => '<select data-c="lvtype" data-d="' + d + '" style="' + (extra || '') + '"><option value=""' + (t ? '' : ' selected') + '>' + (t ? '—' : 'තෝරා නැත') + '</option>' + ['c', 'v', 'o'].map((k) => '<option value="' + k + '"' + (t === k ? ' selected' : '') + '>' + LVN[k] + '</option>').join('') + '</select>';
+  const LV = () => { const L = DB.leave = DB.leave || {}; L.types = L.types || {}; L.lieu = L.lieu || {}; L.log = L.log || []; L.prev = L.prev || []; return L; };
+  function lvInit() { const L = LV(); if (!L.lieuSince) { L.lieuSince = todayStr(); save(); } }
+  const LVN = { c: 'අනියම්', v: 'විවේක', o: 'රාජකාරි', l: 'හිලව්' };
+  const lvSel = (d, t, extra) => '<select data-c="lvtype" data-d="' + d + '" style="' + (extra || '') + '"><option value=""' + (t ? '' : ' selected') + '>' + (t ? '—' : 'තෝරා නැත') + '</option>' + ['c', 'v', 'o', 'l'].map((k) => '<option value="' + k + '"' + (t === k ? ' selected' : '') + '>' + LVN[k] + '</option>').join('') + '</select>';
   function leaveItems(Y) {
     const items = [], L = LV(), H0 = H();
     for (let m = 1; m <= 12; m++) {
@@ -509,16 +511,16 @@
       if (!Object.keys(DB.entries).some((d) => d.slice(0, 7) === mk)) continue;
       OT.summarize(mk, DB.entries, DB.settings, H0).rows.forEach((r) => {
         const amt = r.res.kind === 'leave' ? 1 : (r.res.leave === 'half' ? 0.5 : 0);
-        if (amt) items.push({ d: r.date, amt, t: L.types[r.date] || '', auto: true });
+        if (amt) items.push({ d: r.date, amt, t: L.types[r.date] || '', auto: true, late: !!r.res.lateHalf, lieu: L.lieu[r.date] || '' });
       });
     }
-    L.log.forEach((x) => { if (x.d.slice(0, 4) === String(Y) && !(DB.entries[x.d] && (DB.entries[x.d].status === 'leave'))) items.push({ d: x.d, amt: x.amt, t: x.t, auto: false }); });
+    L.log.forEach((x) => { if (x.d.slice(0, 4) === String(Y) && !(DB.entries[x.d] && (DB.entries[x.d].status === 'leave'))) items.push({ d: x.d, amt: x.amt, t: x.t, auto: false, lieu: x.lieu || '' }); });
     items.sort((a, b) => (a.d < b.d ? -1 : 1));
     return items;
   }
   function leaveCalc(Y) {
     const items = leaveItems(Y), H0 = H();
-    const wk = items.filter((x) => x.t !== 'o' && OT.dayTypeOf(x.d, H0) === 'weekday');
+    const wk = items.filter((x) => x.t !== 'o' && x.t !== 'l' && OT.dayTypeOf(x.d, H0) === 'weekday');
     const runs = []; let cur = [];
     wk.forEach((x) => {
       if (cur.length) { let n = OT.addDays(cur[cur.length - 1].d, 1); while (OT.dayTypeOf(n, H0) !== 'weekday' && n < x.d) n = OT.addDays(n, 1); if (n === x.d) { cur.push(x); return; } runs.push(cur); }
@@ -527,33 +529,89 @@
     if (cur.length) runs.push(cur);
     runs.forEach((r) => { if (r.reduce((s, x) => s + x.amt, 0) > 6) r.forEach((x) => { x.forceV = true; }); });
     let c = 0, v = 0, o = 0, unset = 0;
-    items.forEach((x) => { if (x.t === 'o') o += x.amt; else if (!x.t) unset += x.amt; else if (x.forceV || x.t === 'v') v += x.amt; else c += x.amt; });
+    items.forEach((x) => { if (x.t === 'o' || x.t === 'l') o += x.amt; else if (!x.t) unset += x.amt; else if (x.forceV || x.t === 'v') v += x.amt; else c += x.amt; });
     const cE = Math.min(c, 21), spill = c - cE; v += spill;
     const prevLeft = LV().prev.filter((p) => +p.y < Y).reduce((s, p) => s + Math.max(0, 24 - (+p.v || 0)), 0);
     return { items, c: cE, spill, v, o, unset, cLeft: 21 - cE, vLeft: 24 - v, forced: items.some((x) => x.forceV), prevLeft };
   }
   function leaveSection() {
-    const L = LV(), Y = view.lvY || new Date().getFullYear(), k = leaveCalc(Y);
-    const row = (a, b) => '<span>' + a + '</span><b>' + b + '</b>';
-    let h = '<div class="card"><div class="row sb"><button class="btn alt sm" data-a="lvy" data-d="-1">‹</button><b style="font-size:18px">' + Y + '</b><button class="btn alt sm" data-a="lvy" data-d="1">›</button></div>' +
-      '<div class="tot" style="margin-top:10px">' + row('අනියම් (21) – ගත්', fmtL(k.c) || '0') + row('අනියම් ඉතිරි', fmtL(k.cLeft) || '0') +
-      row('විවේක (24) – ගත්', fmtL(k.v) || '0') + row(k.vLeft < 0 ? '<span style="color:var(--bad)">විවේක ඉක්මවා ඇත</span>' : 'විවේක ඉතිරි', fmtL(Math.abs(k.vLeft)) || '0') +
-      row('රාජකාරි නිවාඩු', fmtL(k.o) || '0') + (k.unset ? row('<span style="color:var(--warn,#b45309)">වර්ගය තෝරා නැති</span>', fmtL(k.unset)) : '') + '</div>' +
-      (k.spill ? '<p class="mute" style="margin:8px 0 0">අනියම් 21 ඉක්මවූ ' + fmtL(k.spill) + ' විවේකයෙන් අඩු කර ඇත.</p>' : '') +
-      (k.vLeft < 0 ? '<p class="mute" style="margin:8px 0 0">' + (k.prevLeft ? 'පෙර වර්ෂවල ඉතිරි විවේක: ' + fmtL(k.prevLeft) + ' (පහත වගුවෙන්).' : 'පෙර වර්ෂවල ඉතිරි විවේක නිවාඩු ගත්තා නම් පහත වගුවේ එම වර්ෂ ඇතුළත් කරන්න.') + '</p>' : '') + '</div>';
-    h += '<div class="card"><h2>' + Y + ' ගත් නිවාඩු</h2>' + (k.items.length ? k.items.map((x) => '<div class="row" style="gap:6px;margin-bottom:8px;align-items:center"><div style="flex:1;min-width:0"><b>' + x.d.replace(/-/g, '.') + '</b> ' + DAYS_S[wd(x.d)] + '<br><small class="mute">' + (x.amt === 1 ? 'සම්පූර්ණ දවස' : 'වරුවක') + (x.auto ? ' · ඇප් සටහන' : '') + (x.forceV ? ' · දින 6කට වඩා – විවේක' : '') + '</small></div>' + lvSel(x.d, x.t, 'width:110px') + (x.auto ? '' : '<button class="btn alt sm" data-a="lvdel" data-d="' + x.d + '">✕</button>') + '</div>').join('') : '<p class="mute" style="margin:0">නිවාඩු සටහන් නැත.</p>') + '</div>';
-    h += '<div class="card"><h2>+ නිවාඩුවක් එක් කරන්න</h2><p class="mute" style="margin-top:0">ඇප් එක භාවිතා කිරීමට පෙර ගත් නිවාඩු මෙතනින් එක් කරන්න.</p>' +
+    const L = LV();
+    let h = '<div class="card"><h2>ඇප් එක භාවිතා කිරීමට පෙර ගත් නිවාඩු</h2><p class="mute" style="margin-top:0">ඇප් එක භාවිතා කිරීමට පෙර මේ වර්ෂයේ ගත් නිවාඩු මෙතනින් එක් කරන්න.</p>' +
+      (L.log.length ? L.log.slice().sort((a, b) => (a.d < b.d ? -1 : 1)).map((x) => '<div class="row" style="gap:6px;margin-bottom:8px;align-items:center"><div style="flex:1;min-width:0"><b>' + x.d.replace(/-/g, '.') + '</b> ' + DAYS_S[wd(x.d)] + '<br><small class="mute">' + (x.amt === 1 ? 'සම්පූර්ණ දවස' : 'වරුවක') + ' · ' + (LVN[x.t] || '?') + '</small></div><button class="btn alt sm" data-a="lvdel" data-d="' + x.d + '">✕</button></div>').join('') : '') +
       '<label class="f"><span>දිනය</span><input type="date" id="lvDate" value="' + todayStr() + '"></label>' +
       '<label class="f"><span>ප්‍රමාණය</span><select id="lvAmt"><option value="1">සම්පූර්ණ දවස</option><option value="0.5">වරුවක් (½)</option></select></label>' +
-      '<label class="f"><span>වර්ගය</span><select id="lvType"><option value="c">අනියම්</option><option value="v">විවේක</option><option value="o">රාජකාරි</option></select></label>' +
-      '<button class="btn gold block" data-a="lvadd">එක් කරන්න</button></div>';
+      '<label class="f"><span>වර්ගය</span><select id="lvType"><option value="c">අනියම්</option><option value="v">විවේක</option><option value="o">රාජකාරි</option><option value="l">හිලව්</option></select></label>' +
+      '<button class="btn alt block" data-a="lvadd">+ නිවාඩුවක් එක් කරන්න</button></div>';
+    h += '<div class="card"><h2>හිලව් නිවාඩු සඳහා ඉතිරි කරගත් දින</h2><p class="mute" style="margin-top:0">ඇප් එක භාවිතා කිරීමට පෙර ඉතිරි කරගත් (දීමනා නොගෙන හිලව් නිවාඩුවකට තැබූ) සෙනසුරාදා / ඉරිදා / ර.ප්‍ර.නි. දින මෙතැනින් එක් කරන්න. වසරක් ඉක්මවූ ඒවා අවලංගුයි.</p>' +
+      (L.lieuLog || []).slice().sort((a, b) => (a.d < b.d ? -1 : 1)).map((x) => '<div class="row" style="gap:6px;margin-bottom:8px;align-items:center"><div style="flex:1"><b>' + x.d.replace(/-/g, '.') + '</b> ' + DAYS_S[wd(x.d)] + '</div><button class="btn alt sm" data-a="lvldel" data-d="' + x.d + '">✕</button></div>').join('') +
+      '<label class="f"><span>දිනය</span><input type="date" id="lvlDate" value="' + todayStr() + '"></label><button class="btn alt block" data-a="lvladd">+ දිනයක් එක් කරන්න</button></div>';
     h += '<div class="card"><h2>පසුගිය වර්ෂවල ගත් නිවාඩු</h2><p class="mute" style="margin-top:0">අනිවාර්ය නැත. පෙර වර්ෂවල ඉතිරි විවේක නිවාඩු භාවිතා කරන්නේ නම් පමණක් ඇතුළත් කරන්න (ගත් ප්‍රමාණය).</p>' +
       (L.prev.length ? '<div class="row" style="gap:6px;margin-bottom:4px"><span class="mute" style="flex:1">වර්ෂය</span><span class="mute" style="flex:1">අනියම්</span><span class="mute" style="flex:1">විවේක</span><span style="width:40px"></span></div>' : '') +
       L.prev.map((p, i) => '<div class="row" style="gap:6px;margin-bottom:6px"><input type="number" style="flex:1;min-width:0" value="' + esc(p.y) + '" data-c="lvprev" data-i="' + i + '" data-f="y"><input type="number" step="0.5" style="flex:1;min-width:0" value="' + esc(p.c) + '" data-c="lvprev" data-i="' + i + '" data-f="c"><input type="number" step="0.5" style="flex:1;min-width:0" value="' + esc(p.v) + '" data-c="lvprev" data-i="' + i + '" data-f="v"><button class="btn alt sm" data-a="lvprevdel" data-i="' + i + '">✕</button></div>').join('') +
       '<button class="btn alt sm" data-a="lvprevadd">+ වර්ෂයක් එක් කරන්න</button></div>';
     return h;
   }
-  function grpOf(st) { return (st === 'app' || st === 'lv') ? 'app' : (st === 'me' || !st ? 'me' : 'x'); }
+  function leaveTableHtml(Y0) {
+    const Y = Y0, k = leaveCalc(Y), H0 = H();
+    const grp = [];
+    k.items.forEach((x) => {
+      const et = x.forceV ? 'v' : (x.t || '?');
+      const g = grp[grp.length - 1];
+      if (g && x.amt === 1 && g.last.amt === 1 && g.et === et && g.last.lieu === x.lieu) {
+        let n = OT.addDays(g.last.d, 1); while (OT.dayTypeOf(n, H0) !== 'weekday' && n < x.d) n = OT.addDays(n, 1);
+        if (n === x.d) { g.items.push(x); g.last = x; return; }
+      }
+      grp.push({ et, items: [x], last: x });
+    });
+    const md = (d) => d.slice(5).replace('-', '.');
+    const cell = 'border:1px solid var(--line);padding:5px 3px;text-align:center;font-size:12px';
+    let t = '<table style="border-collapse:collapse;width:100%;table-layout:fixed"><thead><tr style="background:var(--card)"><th style="' + cell + '" colspan="2">දිනය</th><th style="' + cell + ';width:15%" rowspan="2">අනියම්</th><th style="' + cell + ';width:15%" rowspan="2">විවේක</th><th style="' + cell + ';width:15%" rowspan="2">වෙනත්</th><th style="' + cell + ';width:25%" rowspan="2">විස්තරය</th></tr><tr style="background:var(--card)"><th style="' + cell + '">සිට</th><th style="' + cell + '">දක්වා</th></tr></thead><tbody>';
+    grp.forEach((g) => {
+      const n = g.items.reduce((s, x) => s + x.amt, 0), f = g.items[0], desc = [];
+      if (g.et === 'o') desc.push('D/L'); else if (g.et === 'l') desc.push('L/L' + (f.lieu ? ' (' + f.lieu.replace(/-/g, '.') + ')' : '')); else if (g.et === '?') desc.push('වර්ගය ?');
+      if (g.items.some((x) => x.late)) desc.push('ප්‍රමාද');
+      t += '<tr><td style="' + cell + '">' + md(f.d) + '</td><td style="' + cell + '">' + (g.items.length > 1 ? md(g.last.d) : '') + '</td><td style="' + cell + '">' + (g.et === 'c' ? fmtL(n) : '') + '</td><td style="' + cell + '">' + (g.et === 'v' ? fmtL(n) : '') + '</td><td style="' + cell + '">' + (g.et === 'o' || g.et === 'l' ? fmtL(n) : '') + '</td><td style="' + cell + ';text-align:left;font-size:11px">' + desc.join(' · ') + '</td></tr>';
+    });
+    if (!grp.length) t += '<tr><td style="' + cell + '" colspan="6">නිවාඩු සටහන් නැත.</td></tr>';
+    t += '<tr><td style="' + cell + ';font-weight:700" colspan="2">එකතුව</td><td style="' + cell + ';color:#dc2626;font-weight:700">' + (fmtL(k.c) || '0') + '</td><td style="' + cell + ';color:#dc2626;font-weight:700">' + (fmtL(k.v) || '0') + '</td><td style="' + cell + '">' + (fmtL(k.o) || '0') + '</td><td style="' + cell + '"></td></tr>' +
+      '<tr><td style="' + cell + '" colspan="2">ඉතිරි (21 / 24)</td><td style="' + cell + '">' + (fmtL(k.cLeft) || '0') + '</td><td style="' + cell + '">' + (k.vLeft < 0 ? '-' : '') + (fmtL(Math.abs(k.vLeft)) || '0') + '</td><td style="' + cell + '"></td><td style="' + cell + '"></td></tr></tbody></table>';
+    return '<div class="row sb" style="margin-bottom:10px;gap:6px"><span></span><div class="row" style="gap:8px;align-items:center"><button class="btn alt sm" data-a="lvypg" data-d="-1">‹</button><b style="font-size:17px">' + Y + '</b><button class="btn alt sm" data-a="lvypg" data-d="1">›</button></div></div>' + t +
+      (k.spill ? '<p class="mute" style="margin:8px 0 0">අනියම් 21 ඉක්මවූ ' + fmtL(k.spill) + ' විවේකයෙන් අඩු කර ඇත.</p>' : '') +
+      (k.vLeft < 0 ? '<p class="mute" style="margin:8px 0 0">' + (k.prevLeft ? 'පෙර වර්ෂවල ඉතිරි විවේක: ' + fmtL(k.prevLeft) + '.' : 'පෙර වර්ෂවල ඉතිරි විවේක ඇත්නම් SETTINGS → නිවාඩු හි ඇතුළත් කරන්න.') + '</p>' : '') +
+      '<p class="mute" style="margin:8px 0 0">D/L = රාජකාරි නිවාඩු · L/L = හිලව් නිවාඩු</p>';
+  }
+  function lieuList() {
+    const L = LV(), H0 = H(), today = todayStr(), since = L.lieuSince || today, out = [];
+    Object.keys(DB.entries).sort().forEach((d) => { const e = DB.entries[d]; if (e && e.status === 'worked' && e.special === 'comp' && d >= since) out.push({ d, in: e.in, out: e.out }); });
+    (L.lieuLog || []).forEach((x) => { if (!out.some((o) => o.d === x.d)) out.push({ d: x.d, in: '', out: '', manual: true }); });
+    out.sort((a, b) => (a.d < b.d ? -1 : 1));
+    out.forEach((x) => {
+      const ty = OT.dayTypeOf(x.d, H0);
+      x.kind = ty === 'sat' ? 'සෙනසුරාදා' : ty === 'sun' ? 'ඉරිදා' : ty === 'holiday' ? 'ර.ප්‍ර.නි. – ' + (H0[x.d] || '') : 'සතියේ දිනය';
+      x.used = Object.keys(L.lieu).find((k) => L.lieu[k] === x.d && L.types[k] === 'l') || '';
+      x.expired = !x.used && OT.addDays(x.d, 365) < today;
+    });
+    return out;
+  }
+  function renderLeaveTab() {
+    const ls = view.ls || 'year', L = LV(), thisY = new Date().getFullYear();
+    let h = '<div class="seg stabs">' + [['year', String(thisY)], ['past', 'ඉකුත් නිවාඩු'], ['lieu', 'හිලව් ඉතිරි']].map(([k, n]) => '<button class="' + (k === ls ? 'on' : '') + '" data-a="lstab" data-s="' + k + '">' + n + '</button>').join('') + '</div>';
+    const cell = 'border:1px solid var(--line);padding:6px 4px;text-align:center;font-size:13px';
+    if (ls === 'year') { if (!view.lvY) view.lvY = thisY; h += '<div class="card" style="padding:10px 6px;overflow-x:auto">' + leaveTableHtml(view.lvY) + '</div>'; }
+    else if (ls === 'past') {
+      const rows = L.prev.slice().sort((a, b) => b.y - a.y);
+      h += '<div class="card"><h2>ඉකුත් නිවාඩු</h2><table style="border-collapse:collapse;width:100%"><thead><tr style="background:var(--card)"><th style="' + cell + '">වර්ෂය</th><th style="' + cell + '">අනියම්</th><th style="' + cell + '">විවේක</th></tr></thead><tbody>' +
+        (rows.length ? rows.map((p) => '<tr><td style="' + cell + '">' + esc(p.y) + '</td><td style="' + cell + '">' + (fmtL(+p.c) || '0') + '</td><td style="' + cell + '">' + (fmtL(+p.v) || '0') + '</td></tr>').join('') : '<tr><td style="' + cell + '" colspan="3">සටහන් නැත.</td></tr>') + '</tbody></table>' +
+        '<p class="mute" style="margin:10px 0 0">පෙර වර්ෂවල ගත් නිවාඩු SETTINGS → නිවාඩු පිටුවෙන් ඇතුළත් කරන්න.</p><button class="btn alt block" style="margin-top:8px" data-a="lvgoset">SETTINGS → නිවාඩු ➜</button></div>';
+    } else {
+      const li = lieuList();
+      h += '<div class="card"><h2>හිලව් නිවාඩු සඳහා ඉතිරි කරගත් දින</h2><table style="border-collapse:collapse;width:100%"><thead><tr style="background:var(--card)"><th style="' + cell + '">දිනය</th><th style="' + cell + '">පැමිණීම</th><th style="' + cell + '">පිටවීම</th><th style="' + cell + '">නිවාඩුව</th></tr></thead><tbody>' +
+        (li.length ? li.map((x) => { const g = x.used || x.expired ? 'color:var(--mute);' : ''; return '<tr style="' + g + '"><td style="' + cell + '">' + x.d.replace(/-/g, '.') + '</td><td style="' + cell + '">' + (x.in ? hm(x.in) : '') + '</td><td style="' + cell + '">' + (x.out ? hm(x.out) : '') + '</td><td style="' + cell + ';font-size:12px">' + esc(x.kind) + (x.used ? '<br><small>භාවිතා කළා (' + x.used.replace(/-/g, '.') + ')</small>' : x.expired ? '<br><small style="color:var(--bad)">අවලංගුයි (වසරක් ඉක්මවා ඇත)</small>' : '') + '</td></tr>'; }).join('') : '<tr><td style="' + cell + '" colspan="4">ඉතිරි කරගත් දින නෑ.</td></tr>') + '</tbody></table>' +
+        '<p class="mute" style="margin:10px 0 0">වවුචරය සකසද්දී "හිලව් නිවාඩුවට" තේරූ දින මෙහි එකතු වෙයි. කලින් ඉතිරි කළ දින SETTINGS → නිවාඩු හි ඇතුළත් කළ හැක. ඉතිරි කළ දිනයේ සිට වසරක් ඇතුළත පමණක් හිලව් නිවාඩුවක් ගත හැක.</p></div>';
+    }
+    return h;
+  }
+  function grpOf(st) { return st === 'app' ? 'app' : (st === 'me' || !st ? 'me' : 'x'); }
   function curLocked(st) {
     st = st || view.st || 'me'; const g = grpOf(st), S = DB.settings;
     if (g === 'app') return false;
@@ -617,13 +675,13 @@
   function renderHelp() {
     const sec = (title, body) => HELP_READY ? '<details class="card help"' + (view.helpOpen && title.indexOf(view.helpOpen) >= 0 ? ' open' : '') + '><summary><b>' + title + '</b></summary><div class="hb">' + body + '</div></details>' : '<div class="card help" data-a="helpna" style="cursor:pointer"><b>' + title + '</b></div>';
     const STK = { 'නිවාඩු': 'lv', 'පුද්ගලික': 'me', 'වැටුප / නීති': 'pay', 'වැටුප් / නීති': 'pay', 'අනුපාත / නීති': 'pay', 'සීමා': 'lim', 'PUBLIC HOLIDAYS': 'hol', 'ඇප්': 'app' };
-    const TABK = { 'මුල් පිටුව': 'home', 'මාසය': 'month', 'වවුචර්': 'claims' };
+    const TABK = { 'මුල් පිටුව': 'home', 'මාසය': 'month', 'වවුචර්': 'month' };
     const lk = (t, st, label) => '<a class="hl" data-a="hgo" data-t="' + t + '"' + (st ? ' data-st="' + st + '"' : '') + '>' + label + '</a>';
     const linkHelp = (x) => x
       .replace(/SETTINGS → පුද්ගලික → "අතිකාල රාජකාරි විස්තරය"/g, () => lk('settings', '', 'SETTINGS') + ' → ' + lk('settings', 'me', 'පුද්ගලික') + ' → "<a class="hl" data-a="hgofield" data-f="workDesc">අතිකාල රාජකාරි විස්තරය</a>"')
       .replace(/SETTINGS → (පුද්ගලික|නිවාඩු|වැටුප් \/ නීති|වැටුප \/ නීති|අනුපාත \/ නීති|සීමා|PUBLIC HOLIDAYS|ඇප්)/g, (m, k) => lk('settings', '', 'SETTINGS') + ' → ' + lk('settings', STK[k], k))
       .replace(/Notifications Allow/g, '<a class="hl" data-a="hgonotif">Notifications Allow</a>')
-      .replace(/"(මුල් පිටුව|මාසය|වවුචර්)"/g, (m, k) => '"' + lk(TABK[k], '', k) + '"');
+      .replace(/"(මුල් පිටුව|මාසය|වවුචර්)"/g, (m, k) => '"' + lk(TABK[k], k === 'වවුචර්' ? 'vch' : '', k) + '"');
     const li = (arr) => '<ul>' + arr.map((x) => '<li>' + linkHelp(x) + '</li>').join('') + '</ul>';
     let h = '<div class="row sb" style="margin-bottom:10px"><b>' + lg('භාවිත මාර්ගෝපදේශය', 'User guide') + '</b>' + (EN_ON ? '<div class="seg" style="margin:0;width:170px"><button class="' + (LANG() === 'si' ? 'on' : '') + '" data-a="setlang" data-l="si">සිංහල</button><button class="' + (LANG() === 'en' ? 'on' : '') + '" data-a="setlang" data-l="en">English</button></div>' : '') + '</div>';
     h += sec(lg('1. ආරම්භ කිරීම', '1. Getting started'), li([].concat(DB.settings.viaBrowser && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && navigator.standalone !== true ? [lg('Chrome වල ⋮ Menu → "ඇප් එකක් ලෙස ෆෝන් එකට දාගන්න (Install app)" තෝරන්න. එවිට ඇප් එක ෆෝන් එකේ අයිකනයක් ලෙස එයි, අන්තර්ජාලය නැතිවත් ක්‍රියා කරයි.', 'In Chrome open the ⋮ menu and tap "Install app". The app is added to your home screen and works offline.')] : [], [
@@ -691,10 +749,11 @@
       lg('නිවැරදි නම් "✔ නිවැරදියි" ඔබන්න. වැරදි තිබේ නම් "✎ වෙනස් කරන්න" ඔබා නිවැරදි කර SAVE කරන්න. මුදල වෙනස් වුවහොත් නැවත පරීක්ෂා කළ යුතුය.', 'Correct or edit the words.')
     ])); 
     h += sec(lg('නිවාඩු සටහන් කිරීම', 'Recording leave'), li([
-      lg('SETTINGS → නිවාඩු පිටුවේ "පසුගිය වර්ෂවල ගත් නිවාඩු" වගුවේ, පෙර වර්ෂවල ගත් අනියම් සහ විවේක නිවාඩු ගණන (වර්ෂය / අනියම් / විවේක) ඇතුළත් කළ හැක. පෙර වර්ෂවල ඉතිරි විවේක නිවාඩු භාවිතා කරන්නේ නම් පමණක් මෙය අවශ්‍යයි.', 'Past years: enter the casual and vacation leave taken in each earlier year (only needed if you will use leftover vacation leave).'),
-      lg('ඇප් එක භාවිතා කිරීමට පෙර මේ වර්ෂයේ ගත් නිවාඩු SETTINGS → නිවාඩු පිටුවේ "+ නිවාඩුවක් එක් කරන්න" වලින් ඇතුළත් කරන්න. දිනය කැලැන්ඩරයෙන් තෝරා, සම්පූර්ණ දවසද වරුවක්ද සහ අනියම් / විවේක / රාජකාරි තෝරන්න.', 'Leave taken this year before using the app: add it in Settings → Leave with date, full day or half day, and type.'),
-      lg('ඇප් එකේ සටහන් කළ නිවාඩු (සම්පූර්ණ දින සහ වරුවක නිවාඩු) "මාසය" පිටුවේ "නිවාඩු සාරාංශය" යටතේ පෙන්වයි. එහිම ඒ ඒ නිවාඩුව අනියම් / විවේක / රාජකාරි තෝරන්න.', 'Leave recorded in the app is listed under the leave summary on the Month tab; choose its type there.'),
-      lg('"මාසය" පිටුවේ නිවාඩු සාරාංශයේ "අවුරුද්දේ නිවාඩු" බොත්තමෙන් අවුරුද්දේ අනියම් (21) සහ විවේක (24) නිවාඩු වලින් ගත් සහ ඉතිරි ප්‍රමාණය බලන්න.', 'The "Leave of the year" button shows casual (21) and vacation (24) leave taken and remaining.')]));
+      lg('දිනපතා සටහන් කරද්දී "නිවාඩු" තේරුවාම අනියම් / විවේක / රාජකාරි / හිලව් තෝරන්න. හිලව් නම් ඉතිරි කරගත් දින ලැයිස්තුවෙන් සේවය කළ දිනයත් තෝරන්න. වරුවක නිවාඩුවක වර්ගයත් එම දිනය එබීමෙන් තෝරන්න. පසුව "මාසය → දිනපතා සටහන්" වල නිවාඩු දිනය එබීමෙන් වර්ගය වෙනස් කළ හැක.', 'Choose the leave type when marking a day as leave.'),
+      lg('ඇප් එක භාවිතා කිරීමට පෙර මේ වර්ෂයේ ගත් නිවාඩු SETTINGS → නිවාඩු පිටුවේ "+ නිවාඩුවක් එක් කරන්න" වලින් ඇතුළත් කර SAVE කරන්න. දිනය කැලැන්ඩරයෙන් තෝරා, සම්පූර්ණ දවසද වරුවක්ද සහ අනියම් / විවේක / රාජකාරි / හිලව් තෝරන්න.', 'Add leave taken before using the app in Settings → Leave and SAVE.'),
+      lg('පෙර වර්ෂවල ගත් අනියම් සහ විවේක නිවාඩු ගණන SETTINGS → නිවාඩු පිටුවේ "පසුගිය වර්ෂවල ගත් නිවාඩු" වගුවේ (වර්ෂය / අනියම් / විවේක) ඇතුළත් කරන්න. පෙර වර්ෂවල ඉතිරි විවේක නිවාඩු භාවිතා කරන්නේ නම් පමණක් මෙය අවශ්‍යයි.', 'Past years: enter casual and vacation leave taken per year.'),
+      lg('"නිවාඩු" පිටුවේ මේ වර්ෂයේ ගත් සියලු නිවාඩු (සිට / දක්වා / අනියම් / විවේක / වෙනත් / විස්තරය) වගුවක් ලෙසත්, අනියම් (21) සහ විවේක (24) හි එකතුව සහ ඉතිරි ප්‍රමාණයත් පෙනේ. "ඉකුත් නිවාඩු" හි පෙර වර්ෂවල ගත් නිවාඩු පෙනේ.', 'The Leave tab shows the leave table of the year and past years.'),
+      lg('වවුචරය සකසද්දී "හිලව් නිවාඩුවට" තේරූ දින "නිවාඩු → හිලව් ඉතිරි" හි පෙනේ. ඒ දිනයේ සිට වසරක් ඇතුළත පමණක් හිලව් නිවාඩුවක් ගත හැක; වසරක් ඉක්මවූ දින "අවලංගුයි" ලෙස පෙනේ. කලින් ඉතිරි කළ දින SETTINGS → නිවාඩු හි ඇතුළත් කළ හැක.', 'Days saved for lieu leave appear under Leave → Lieu; they expire after a year.')]));
     h += sec(lg('SAVE SETTINGS', '12. Saving settings'), li([
       lg('SETTINGS පිටුව SAVE කල විට ලොක් වේ. වෙනස් කිරීමට "CHANGE SETTINGS" ඔබා, අවශ්‍ය වෙනස්කම් කර SAVE ඔබන්න.', 'Settings lock after saving.'),
       lg('SAVE නොකර වෙනත් අනු පිටුවකට හෝ ප්‍රධාන පිටුවකට යාමට නොහැක; අනතුරු ඇඟවීමක් එයි. "SETTINGS → සීමා" වල අලුත් සීමාවක් ඇතුළත් කළ විට "සීමාව SAVE කරන්න" ද ඔබන්න.', 'You cannot leave unsaved settings.')
@@ -768,6 +827,10 @@
         '<label class="sw"><input type="checkbox" id="nol" ' + (draft.noLimit || draft.overnight ? 'checked' : '') + (draft.overnight ? ' disabled' : '') + '><span>අද OT වේලාව සීමාවක් නැත</span></label>' +
         '<div class="pv" id="pv"></div>';
     }
+    { const L = LV(); let isLv = wdy && draft.status === 'leave';
+      if (!isLv && draft.status === 'worked' && draft.in && draft.out) { const rr = OT.calcDay(draft, type, S, { cutoff: OT.cutoffFor(ds, S), nextType: 'weekday' }); isLv = rr.valid && rr.leave === 'half'; }
+      if (isLv) h += '<div class="card" style="margin:8px 0;padding:10px"><div class="mute" style="margin-bottom:6px">' + (draft.status === 'leave' ? 'නිවාඩු' : 'වරුවක නිවාඩුව') + ' වර්ගය</div>' + lvSel(ds, L.types[ds] || '', 'width:100%').replace('data-c="lvtype"', 'data-c="lvtype" data-sh="1"') +
+        (L.types[ds] === 'l' ? (() => { const av = lieuList().filter((x) => (!x.used && !x.expired) || x.used === ds); return '<label class="f" style="margin-top:8px"><span>සේවය කළ දිනය (හිලව් වෙනුවෙන්)</span>' + (av.length ? '<select data-c="lvlieu" data-d="' + ds + '" data-sh="1"><option value="">— තෝරන්න —</option>' + av.map((x) => '<option value="' + x.d + '"' + (L.lieu[ds] === x.d ? ' selected' : '') + '>' + x.d.replace(/-/g, '.') + ' ' + esc(x.kind) + '</option>').join('') + '</select>' : '<div class="mute">ඉතිරි කරගත් දින නෑ. වවුචරයේදී "හිලව් නිවාඩුවට" තේරූ දින හෝ SETTINGS → නිවාඩු හි ඇතුළත් කළ දින මෙහි පෙනේ.</div>') + '</label>'; })() : '') + '</div>'; }
     h += '<div class="row" style="margin-top:6px"><button class="btn" style="flex:1" data-a="savedraft">SAVE</button>' +
       (DB.entries[ds] ? '<button class="btn alt" data-a="cleardraft">DELETE</button>' : '') + '<button class="btn alt" data-a="closeSheet">CLOSE</button></div>';
     sheetHTML(h);
@@ -1216,30 +1279,35 @@
       const i = STABS.findIndex((x) => x[0] === (view.st || 'me')) + Number(el.dataset.d);
       if (i >= 0 && i < STABS.length) { view.st = STABS[i][0]; render(); window.scrollTo(0, 0); }
     },
-    viewsum() { view.tab = 'month'; render(); const e = document.getElementById('mSum'); if (e) e.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); },
+    mstab(el) { view.ms = el.dataset.s; render(); window.scrollTo(0, 0); },
+    viewsum() { view.tab = 'month'; view.ms = 'sum'; render(); const e = document.getElementById('mSum'); if (e) e.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); },
     aboutapp() { const b = document.getElementById('aboutAppBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     about() { const b = document.getElementById('aboutBox'); if (b) b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     unlock() { if (grpOf(view.st || 'me') === 'x') DB.settings.lockedX = false; else DB.settings.locked = false; view.dirty = true; save(); render(); },
     stab(el) { if (guardLeave()) return; view.st = el.dataset.s; render(); window.scrollTo(0, 0); },
     helpstart() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
     helplens() { if (guardLeave()) return; view.tab = 'help'; view.helpOpen = 'ආරම්භ කිරීම'; closeSheet(); render(); const d = document.querySelector('details.help[open]'); if (d) d.scrollIntoView(); else window.scrollTo(0, 0); view.helpOpen = null; },
-    lvopen() { if (view.tab === 'settings' && guardLeave()) return; view.lvY = +view.month.slice(0, 4); view.tab = 'settings'; view.st = 'lv'; closeSheet(); render(); window.scrollTo(0, 0); },
-    lvy(el) { view.lvY = (view.lvY || new Date().getFullYear()) + +el.dataset.d; render(); },
+    lvopen() { view.lvY = +view.month.slice(0, 4); view.ls = 'year'; view.tab = 'leave'; render(); window.scrollTo(0, 0); },
+    lstab(el) { view.ls = el.dataset.s; render(); window.scrollTo(0, 0); },
+    lvypg(el) { view.lvY = (view.lvY || new Date().getFullYear()) + +el.dataset.d; render(); },
+    lvladd() { const d = document.getElementById('lvlDate').value; if (!d) return toast('දිනය තෝරන්න', true); const L = LV(); L.lieuLog = L.lieuLog || []; if (L.lieuLog.some((x) => x.d === d)) return toast('මෙම දිනය දැනටමත් ඇතුළත් කර ඇත', true); L.lieuLog.push({ d }); view.dirty = true; save(); render(); toast('එක් කළා'); },
+    lvldel(el) { const L = LV(); L.lieuLog = (L.lieuLog || []).filter((x) => x.d !== el.dataset.d); view.dirty = true; save(); render(); },
+    lvgoset() { if (view.tab === 'settings' && guardLeave()) return; view.tab = 'settings'; view.st = 'lv'; closeSheet(); render(); window.scrollTo(0, 0); },
     lvadd() {
       const d = document.getElementById('lvDate').value; if (!d) return toast('දිනය තෝරන්න', true);
       const L = LV(); const e = DB.entries[d];
       if (e && e.status === 'leave') return toast('මෙම දිනය දැනටමත් ඇප් එකේ නිවාඩුවක් ලෙස සටහන්ව ඇත', true);
       if (L.log.some((x) => x.d === d)) return toast('මෙම දිනය දැනටමත් ඇතුළත් කර ඇත', true);
       L.log.push({ d, amt: +document.getElementById('lvAmt').value, t: document.getElementById('lvType').value });
-      view.lvY = +d.slice(0, 4); save(); render(); toast('එක් කළා');
+      view.dirty = true; save(); render(); toast('එක් කළා');
     },
-    lvdel(el) { if (!confirmT('මෙම නිවාඩුව ඉවත් කරන්නද?')) return; const L = LV(); L.log = L.log.filter((x) => x.d !== el.dataset.d); save(); render(); },
-    lvprevadd() { const L = LV(); const ys = L.prev.map((p) => +p.y); L.prev.push({ y: ys.length ? Math.min(...ys) - 1 : new Date().getFullYear() - 1, c: 0, v: 0 }); save(); render(); },
-    lvprevdel(el) { const L = LV(); L.prev.splice(+el.dataset.i, 1); save(); render(); },
+    lvdel(el) { if (!confirmT('මෙම නිවාඩුව ඉවත් කරන්නද?')) return; const L = LV(); L.log = L.log.filter((x) => x.d !== el.dataset.d); view.dirty = true; save(); render(); },
+    lvprevadd() { const L = LV(); const ys = L.prev.map((p) => +p.y); L.prev.push({ y: ys.length ? Math.min(...ys) - 1 : new Date().getFullYear() - 1, c: 0, v: 0 }); view.dirty = true; save(); render(); },
+    lvprevdel(el) { const L = LV(); L.prev.splice(+el.dataset.i, 1); view.dirty = true; save(); render(); },
     lockedtap() { const b = document.getElementById('unlockBtn'); if (!b) return; b.scrollIntoView({ behavior: 'smooth', block: 'center' }); b.style.outline = '3px solid #dc2626'; setTimeout(() => { b.style.outline = ''; }, 1800); toast(lg('වෙනස් කිරීමට මුලින් "CHANGE SETTINGS" ඔබන්න', 'Tap "Edit settings" first'), true); },
     hgonotif() { if (view.tab === 'settings' && guardLeave()) return; view.tab = 'settings'; view.st = 'app'; closeSheet(); render(); const b = document.querySelector('[data-a=notif]'); if (b) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); b.style.outline = '3px solid #dc2626'; setTimeout(() => { b.style.outline = ''; }, 2500); } },
     hgofield(el) { goField(el.dataset.f, ''); },
-    hgo(el) { if (view.tab === 'settings' && guardLeave()) return; view.tab = el.dataset.t; if (el.dataset.st) view.st = el.dataset.st; closeSheet(); render(); window.scrollTo(0, 0); },
+    hgo(el) { if (view.tab === 'settings' && guardLeave()) return; view.tab = el.dataset.t; if (el.dataset.st) { if (view.tab === 'month') view.ms = el.dataset.st; else view.st = el.dataset.st; } closeSheet(); render(); window.scrollTo(0, 0); },
     helpna() { toast('සකස් කර අවසන් නැත, පසුව උත්සාහ කරන්න', true); view.tab = 'home'; render(); window.scrollTo(0, 0); },
     setlang(el) { if (!EN_ON) return; DB.settings.lang = el.dataset.l === 'en' ? 'en' : 'si'; save(); location.reload(); },
     prev() { shiftMonth(-1); render(); },
@@ -1298,7 +1366,7 @@
     claim() { view.spAll = false; if (requireFields(['name', 'designation', 'baseSalary', 'salaryNo', 'workDesc', 'payUnit'], false)) return; { const un = unrecorded(view.month + '-01', view.month + '-31'); if (un.length) { unrecPopup(un); return; } } if (spRelevant(SUM())) spPopup(false); else A.claimgo(); },
     spmanual() { spPopup(true); },
     restorepick() { view.tab = 'settings'; view.st = 'app'; render(); const f = document.getElementById('restore'); if (f) f.click(); },
-    gotounrec(el) { const d = el.dataset.d; view.month = d.slice(0, 7); view.tab = 'month'; render(); setTimeout(() => { const it = document.querySelector('.item[data-d="' + d + '"]'); if (it) { it.scrollIntoView({ behavior: 'smooth', block: 'center' }); it.style.outline = '3px solid #e8b53a'; setTimeout(() => { it.style.outline = ''; }, 2500); } }, 60); },
+    gotounrec(el) { const d = el.dataset.d; view.month = d.slice(0, 7); view.tab = 'month'; view.ms = 'days'; render(); setTimeout(() => { const it = document.querySelector('.item[data-d="' + d + '"]'); if (it) { it.scrollIntoView({ behavior: 'smooth', block: 'center' }); it.style.outline = '3px solid #e8b53a'; setTimeout(() => { it.style.outline = ''; }, 2500); } }, 60); },
     unrecedit(el) { const p = document.getElementById('unrec'); if (p) p.remove(); openEditor(el.dataset.d); },
     unrecleave(el) { DB.entries[el.dataset.d] = { status: 'leave' }; save(); render(); A.claim(); },
     unrecoff() {
@@ -1312,7 +1380,7 @@
       const sm = SUM();
       const inc = sm.rows.filter((r) => r.res.kind === 'incomplete').length;
       if (!confirmT((inc ? '⚠ අසම්පූර්ණ දින ' + inc + ' ක් ඇත (පැමිණීම හෝ පිටවීම නැත). ඒවා ගණනයට ඇතුළත් නොවේ.\n\n' : '') + monthLabel(view.month) + ' සඳහා හිමිකම තහවුරු කර SAVE කරන්නද?\nOT ' + dur(sm.payMin) + ' (' + money(sm.otAmount) + '), දීමනා දින ' + sm.allowDays + ' (' + money(sm.allowAmount) + ')')) return;
-      DB.claims[view.month] = snapshotFor(view.month, true); save(); toast('ඉල්ලීම සුරැකිණි'); view.tab = 'claims'; render();
+      DB.claims[view.month] = snapshotFor(view.month, true); save(); toast('ඉල්ලීම සුරැකිණි'); view.tab = 'month'; view.ms = 'vch'; render();
     },
     voucher(el) {
       const k = el.dataset.m;
@@ -1342,7 +1410,7 @@
     },
     gotoclaim(el) {
       if (el && el.dataset && el.dataset.m) view.month = el.dataset.m;
-      view.tab = 'month'; render();
+      view.tab = 'month'; view.ms = 'sum'; render();
       const b = document.querySelector('[data-a=claim]');
       if (b) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); b.style.outline = '4px solid #e8b53a'; setTimeout(() => { b.style.outline = ''; }, 1800); }
     },
@@ -1445,7 +1513,7 @@
           const j = JSON.parse(t); const d = j.data || j;
           if (!d.entries && !d.settings) throw new Error('bad');
           if (!confirmT('දැනට ඇති දත්ත BACKUP FILE එකෙන් ආදේශ කරන්නද?')) return;
-          DB = { settings: fixStation(OT.mergeSettings(d.settings)), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {}, leave: d.leave || { types: {}, log: [], prev: [] } }; ensureLegacy(DB); DB.settings.locked = true; DB.settings.lockedX = true; view.dirty = false; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED');
+          DB = { settings: fixStation(OT.mergeSettings(d.settings)), entries: d.entries || {}, claims: d.claims || {}, wordsOv: d.wordsOv || {}, leave: d.leave || { types: {}, log: [], prev: [] } }; ensureLegacy(DB); lvInit(); DB.settings.locked = true; DB.settings.lockedX = true; view.dirty = false; view.capDirty = false; save(); render(); toast('RESTORE COMPLETED');
         } catch (err) { toast('ගොනුව වැරදියි', true); }
       });
       return;
@@ -1476,8 +1544,9 @@
       view.dirty = true; save();
     } else if (c === 'lim') { DB.settings.limits[+el.dataset.i][el.dataset.f] = el.value; view.dirty = true; save(); }
     else if (c === 'spot' || c === 'splv') { const e = DB.entries[el.dataset.d]; if (e) { const k = c === 'spot' ? 'otTo' : 'lvOverride'; if (el.value) e[k] = el.value; else delete e[k]; save(); render(); spPopup(true); } }
-    else if (c === 'lvtype') { const L = LV(), d = el.dataset.d, x = L.log.find((q) => q.d === d); if (x && !DB.entries[d]) x.t = el.value; else if (el.value) L.types[d] = el.value; else delete L.types[d]; save(); render(); }
-    else if (c === 'lvprev') { LV().prev[+el.dataset.i][el.dataset.f] = +el.value; save(); render(); }
+    else if (c === 'lvtype') { const L = LV(), d = el.dataset.d, x = L.log.find((q) => q.d === d); if (x && !DB.entries[d]) x.t = el.value; else if (el.value) L.types[d] = el.value; else delete L.types[d]; if (el.value !== 'l') delete L.lieu[d]; save(); if (el.dataset.sh) renderSheet(); else render(); }
+    else if (c === 'lvlieu') { const L = LV(); if (el.value) L.lieu[el.dataset.d] = el.value; else delete L.lieu[el.dataset.d]; save(); if (el.dataset.sh) renderSheet(); }
+    else if (c === 'lvprev') { LV().prev[+el.dataset.i][el.dataset.f] = +el.value; view.dirty = true; save(); }
     else if (c === 'rem') { DB.settings.reminderOn = el.checked; view.dirty = true; save(); scheduleNative(); }
   });
   document.addEventListener('input', (e) => {
@@ -1605,7 +1674,7 @@
     if (!S.onboarded && !S.installed && !isStandalone()) return showInstallScreen();
     showDetails();
   }
-  ensureLegacy(DB);
+  ensureLegacy(DB); lvInit();
   if (!DB.settings.lang) { DB.settings.lang = 'si'; save(); } else save(); /* language chooser removed – Sinhala only */
   startFlow();
   { const sp = document.getElementById('splash'); if (sp) setTimeout(() => { sp.style.opacity = '0'; setTimeout(() => sp.remove(), 450); }, Math.max(0, 2500 - performance.now())); }
